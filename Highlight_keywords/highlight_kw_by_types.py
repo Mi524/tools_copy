@@ -33,20 +33,23 @@ def get_keyword_dict(path_list):
 			ws = wb.sheet_by_name(sn)
 			#表头,根据表头获取应该写入红色还是蓝色，还是粗体
 			header_list = []
-			for x in ws.row(0):
-				if type(x.value) == str and x.value.strip() != '':
-					header = x.value.strip()
-				elif (type(x.value) == float or type(x.value) == int) :
-					header = str(x.value).rstrip('0').rstrip('.').strip()
-				else:
-					#为了防止两列中间隔一个空的表头单元格
-					header = None
-				header_list.append(header)
+			try:
+				for x in ws.row(0):
+					if type(x.value) == str and x.value.strip() != '':
+						header = x.value.strip()
+					elif (type(x.value) == float or type(x.value) == int) :
+						header = str(x.value).rstrip('0').rstrip('.').strip()
+					else:
+						#为了防止两列中间隔一个空的表头单元格
+						header = None
 
-			if not header_list:
-				print('Keywords.xlsx should have table header/headers such as red,blue,bold etc.')
-				input('\nPress Enter to exit')
-				sys.exit()
+					if header != None:
+						header_list.append(header)
+
+				if not header_list:
+					enter_exit(f'Error when reading keywords:\n{path}-"{sn}" should have at least one table header(keyword column names).')
+			except IndexError:
+					enter_exit(f'Error when reading keywords:\n{path}-"{sn}" should have at least one table header(keyword column names).')
 
 			seen_keywords = set()
 			for row in list(ws.get_rows())[1:]:
@@ -69,19 +72,22 @@ def get_keyword_dict(path_list):
 					keyword_format_dict[h] = sn.strip().lower() 
 
 		wb.release_resources()
+
 	return keyword_dict, keyword_format_dict
 
-def get_rich_param_list(text,keyword_dict,insert_dict):
+def get_rich_param_list(text,keyword_dict,keyword_dict_sub,insert_dict):
 	"""
 	通过文本和关键词获取需要填入xlsxwriter write_rich_string的第三个内容/param的格式,忽略大小写,re.I
 	:param text:
 	:param keyword_list 
 	"""
-	#关键词列表为空返回原文
+
 	keyword_list = []
 	for x in keyword_dict.values():
-		keyword_list += x
+		if x != None:
+			keyword_list += x
 
+	#关键词列表为空返回原文
 	if not keyword_list:
 		return {'record_list':text}
 
@@ -109,20 +115,18 @@ def get_rich_param_list(text,keyword_dict,insert_dict):
 
 	#记录不同颜色的关键词列表
 	keyword_record_dict = defaultdict(list)
-	for k in keyword_dict:
-		keyword_record_dict[k] = []
 
 	while findall_list:
 		keyword = findall_list.pop(0)
 		target_index = split_list.index(keyword)
-
 		#配合keyword_format_dict的小写
 		#keyword = keyword.lower()
 		for k in keyword_dict.keys():
 			if replace_re_special(keyword.lower()) in keyword_dict[k]:
-				keyword_record_dict[k].append(keyword)
-				#没有出现过的关键字才能继续写入，否则不做写入
-				split_list.insert(target_index,insert_dict[k])
+				if k in keyword_dict_sub.keys():
+					keyword_record_dict[k].append(keyword)
+					#需要高亮的类别出现才插入
+					split_list.insert(target_index,insert_dict[k])
 
 		#按顺序记录
 		record_list += split_list[0:target_index+2]
@@ -170,8 +174,18 @@ def write2wb(xlsxwriter_wb,highlight_column_list,keyword_type_list,keyword_dict,
 	bold_format = xlsxwriter_wb.add_format({'bold':True})
 	#第一个sheet记录高亮关键词结果
 	xlsxwriter_ws = xlsxwriter_wb.add_worksheet('highlight')
+	xlsxwriter_ws_target = xlsxwriter_wb.add_worksheet('keyword_matched')
 	#第一个sheet表头，只写一列即可
 	xlsxwriter_ws.write(0,0,new_highlight_name,bold_format)
+	xlsxwriter_ws.write(0,1,'关键词类别',bold_format)
+	xlsxwriter_ws.write(0,2,'命中关键词',bold_format)
+	xlsxwriter_ws.write(0,3,'命中数量',bold_format)
+
+	#第二个sheet表头
+	for i,k in enumerate(keyword_dict.keys()):
+		format_word = keyword_format_dict[k]
+		cell_format = get_custom_format(xlsxwriter_wb,format_word)
+		xlsxwriter_ws_target.write(0,i,k,cell_format)
 
 	total_len = len(highlight_column_list)
 
@@ -181,8 +195,9 @@ def write2wb(xlsxwriter_wb,highlight_column_list,keyword_type_list,keyword_dict,
 		if  (row_index + 1) % 2000 == 0 or (row_index + 1== total_len)  :
 			print(' Processing...',row_index+1,'/',total_len)
 
-		#1.写入第一个文档的部分
+		#1.写入第一个文档的部分, 需要加上两列结果：命中关键词，命中数量, 排序用excel countif即可
 		column_index = 0
+		keyword_record_dict = None
 		if k_type != None and ( type(k_type)== str and k_type.strip()!='' ) :
 			k_type_list = [ x for x in k_type.split(',') if x != '']
 			#只高亮所需要类别的关键词
@@ -192,13 +207,11 @@ def write2wb(xlsxwriter_wb,highlight_column_list,keyword_type_list,keyword_dict,
 				target_keywords = keyword_dict.get(k,None)
 				keyword_dict_sub[k] = target_keywords
 
-			rich_param_dict = get_rich_param_list(value,keyword_dict_sub,insert_dict)
+			rich_param_dict = get_rich_param_list(value,keyword_dict,keyword_dict_sub,insert_dict)
 
 			params = rich_param_dict['record_list']
 			if type(params) == list:
 				params = [ x for x in params if x != ''] 
-
-			keyword_record_dict = rich_param_dict.get('keyword_record_dict',None)
 
 			if type(params) == str:
 				xlsxwriter_ws.write(row_index+1,column_index,params)
@@ -208,13 +221,36 @@ def write2wb(xlsxwriter_wb,highlight_column_list,keyword_type_list,keyword_dict,
 				if success == -5:
 					one_word_text = params[-1]
 					success = xlsxwriter_ws.write(row_index+1,column_index,one_word_text,params[0])
+
+			keyword_record_dict = rich_param_dict.get('keyword_record_dict',None)
 		else:
 			xlsxwriter_ws.write(row_index+1,0,value)
+
+		#写入第二个sheet的部分，通过关键词字典提取目标关键词, 顺便补充写入第一个sheet的额外内容, 命中关键词，命中数量
+		if keyword_record_dict:
+			counter = 0 
+			for k,v in keyword_record_dict.items():
+
+				format_word = keyword_format_dict[k]
+
+				cell_format = get_custom_format(xlsxwriter_wb,format_word)
+				column_index = list(keyword_dict.keys()).index(k)
+
+				v_text = ','.join(v)
+				xlsxwriter_ws_target.write(row_index+1,column_index,v_text,cell_format)
+				#命中类别
+				xlsxwriter_ws.write(row_index+1,1,k_type)
+				#命中关键词
+				xlsxwriter_ws.write(row_index+1,2,v_text)
+				#命中数量
+				xlsxwriter_ws.write(row_index+1,3,len(v))
 
 		row_index += 1 
 
 	#调整每个列的宽度
 	xlsxwriter_ws.set_column(0,0,width = 50)
+	xlsxwriter_ws_target.set_column(0,len(keyword_dict),width=20)
+	
 	return xlsxwriter_wb
 
 def save_xlsxwriter_wb(xlsxwriter_wb,path):

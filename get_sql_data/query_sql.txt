@@ -1,0 +1,15 @@
+select b._id, b.brand 品牌,b.series 系列,b.model 机型, b.launch_date 上市日期, b.price_range 价格区间,
+	   b.comment_time 评论时间, b.fault_type_report 故障类别 ,b.fault_phen 故障现象, a.title 主题,a.main_body 发帖内容
+from ecommerce_data_original_posts a 
+right join (
+		select  _id,comment_time, brand,series,model,launch_date,price_range, fault_type_report,fault_phen
+		from ecommerce_data  
+		where enddate between '20200701' and '20200731'
+		and fault_type_report <> '无'
+        -- and brand = 'oppo'
+        -- and price_range = '10K-20K' 
+		-- and brand <> 'vivo'
+        -- and fault_type= '拍照类'
+	) b 
+on a._id = b._id 
+order by b.brand,b.series,b.model,b.comment_time  ;
