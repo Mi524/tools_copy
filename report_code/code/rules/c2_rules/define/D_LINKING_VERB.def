@@ -1,0 +1,29 @@
+# 系动词
+
+$or(
+"iam",
+"ihave",
+"imust",
+"ineed",
+"ishall",
+"ishould",
+"iwas",
+"iwere",
+"iwill",
+"iwould"
+		)
+
+$ord(@d3,"i","am")
+$ord(@d3,"i","have")
+$ord(@d3,"i","must")
+$ord(@d3,"i","need")
+$ord(@d3,"i","shall")
+$ord(@d3,"i","should")
+$ord(@d3,"i","was")
+$ord(@d3,"i","were")
+$ord(@d3,"i","will")
+$ord(@d3,"i","would")
+$ord(@d5,"i","will","be")
+$ord(@d4,"iwill","be")
+$ord(@d4,"i","willbe")
+$ord(@d3,"iwillbe")

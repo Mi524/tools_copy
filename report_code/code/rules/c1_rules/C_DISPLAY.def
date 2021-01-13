@@ -1,0 +1,22 @@
+# 显示类
+
+$or(
+"blackscreen",
+"blink",
+"blinking",
+"blinks",
+"bright",
+"brightne",
+"brightness",
+"display",
+"flicker",
+"flickering",
+"lcd",
+"line",
+"ppi",
+"sceren",
+"screen",
+"stripe",
+"stroke"
+		)
+

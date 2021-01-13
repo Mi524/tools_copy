@@ -1,0 +1,22 @@
+# 划伤
+
+$or(
+"cameralen",
+"cameralens",
+"cracks",
+"discolored",
+"loose",
+"popping",
+"scrach",
+"scraches",
+"scratch",
+"scratched",
+"scratches",
+"scratchs",
+"scratchy",
+"scuffed",
+"straches"
+		)
+
+$ord(@d3,"camera","len")
+$ord(@d3,"camera","lens")

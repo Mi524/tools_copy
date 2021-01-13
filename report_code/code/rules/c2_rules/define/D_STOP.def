@@ -1,0 +1,36 @@
+# 停止
+
+$or(
+"cease",
+"fail",
+"failed",
+"fails",
+"leaveswork",
+"leavework",
+"leaveworking",
+"never",
+"pause",
+"stop",
+"stopforever",
+"stopping",
+"stops"
+		)
+
+$ord(@d3,"leave","work")
+$ord(@d3,"leave","working")
+$ord(@d3,"leaves","work")
+$ord(@d3,"stop","forever")
+$ord(@d6,"not","at","all","work")
+$ord(@d5,"notat","all","work")
+$ord(@d5,"not","atall","work")
+$ord(@d5,"not","at","allwork")
+$ord(@d4,"notatall","work")
+$ord(@d4,"not","atallwork")
+$ord(@d3,"notatallwork")
+$ord(@d6,"not","work","at","all")
+$ord(@d5,"notwork","at","all")
+$ord(@d5,"not","workat","all")
+$ord(@d5,"not","work","atall")
+$ord(@d4,"notworkat","all")
+$ord(@d4,"not","workatall")
+$ord(@d3,"notworkatall")

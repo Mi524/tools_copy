@@ -1,0 +1,14 @@
+# 工作
+
+$or(
+"function",
+"wark",
+"warked",
+"warking",
+"warks",
+"work",
+"worked",
+"working",
+"works"
+		)
+

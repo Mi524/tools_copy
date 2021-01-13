@@ -1,0 +1,23 @@
+# 识别
+
+$or(
+"catchup",
+"detect",
+"detected",
+"detection",
+"found",
+"identify",
+"identifying",
+"recognise",
+"recogniser",
+"recognize",
+"recognizer",
+"recognizes",
+"scan",
+"scaner",
+"scanner",
+"sencing",
+"unlock"
+		)
+
+$ord(@d3,"catch","up")

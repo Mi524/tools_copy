@@ -1,0 +1,20 @@
+# 照片
+
+$or(
+"image",
+"images",
+"img",
+"photo",
+"photo/picture",
+"photograph",
+"photographs",
+"photography",
+"photos",
+"pic",
+"pics",
+"picture",
+"picture/photo",
+"pictures",
+"pix"
+		)
+

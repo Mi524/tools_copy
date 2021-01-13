@@ -1,0 +1,9 @@
+# 禁用
+
+$or(
+"abandon",
+"disable"
+		)
+
+$ord(@d5,_D_NOT,"use")
+$ord(@d5,_D_NOT,"used")

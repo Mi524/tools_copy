@@ -1,0 +1,27 @@
+# 永远
+
+$or(
+"alltime",
+"always",
+"forever",
+"permanently",
+"wholetime"
+		)
+
+$ord(@d3,"all","time")
+$ord(@d3,"whole","time")
+$ord(@d5,"all","the","time")
+$ord(@d4,"allthe","time")
+$ord(@d4,"all","thetime")
+$ord(@d3,"allthetime")
+$ord(@d5,"the","whole","time")
+$ord(@d4,"thewhole","time")
+$ord(@d4,"the","wholetime")
+$ord(@d3,"thewholetime")
+$ord(@d6,"all","the","way","along")
+$ord(@d5,"allthe","way","along")
+$ord(@d5,"all","theway","along")
+$ord(@d5,"all","the","wayalong")
+$ord(@d4,"alltheway","along")
+$ord(@d4,"all","thewayalong")
+$ord(@d3,"allthewayalong")

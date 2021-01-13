@@ -1,0 +1,9 @@
+# 慢动作
+
+$or(
+"slowmo",
+"slowmotion"
+		)
+
+$ord(@d3,"slow","mo")
+$ord(@d3,"slow","motion")

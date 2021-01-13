@@ -1,0 +1,13 @@
+# 介词
+
+$or(
+"at",
+"by",
+"during",
+"if",
+"in",
+"on",
+"when",
+"with"
+		)
+

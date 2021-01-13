@@ -1,0 +1,12 @@
+# 代词
+
+$or(
+"it",
+"it's",
+"its",
+"its",
+"that",
+"this",
+"which"
+		)
+

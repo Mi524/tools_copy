@@ -1,0 +1,18 @@
+# 环境
+
+$or(
+"cloudy",
+"condition",
+"dark",
+"darkness",
+"day",
+"dim",
+"dimly",
+"dusk",
+"evening",
+"light",
+"night",
+"sunny",
+"twilight"
+		)
+

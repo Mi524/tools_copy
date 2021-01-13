@@ -1,0 +1,32 @@
+# 脸部特征
+
+$or(
+"closeeye",
+"cosmetics",
+"cover",
+"ear",
+"eye",
+"eyeclose",
+"eyesclosed",
+"glass",
+"glasses",
+"makeup",
+"maquillage",
+"mask",
+"mouth",
+"noose",
+"scarf",
+"sleep",
+"sleeping",
+"sleepping",
+"slept",
+"sunburn",
+"sunglass",
+"sunglasses"
+		)
+
+$ord(@d3,"close","eye")
+$ord(@d3,"eye","close")
+$ord(@d3,"eyes","closed")
+$ord(@d3,"make","up")
+$ord(@d3,"sun","burn")

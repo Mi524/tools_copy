@@ -1,0 +1,11 @@
+# 信息类
+
+$or(
+"imessage",
+"message",
+"messages",
+"msg",
+"msgs",
+"sms"
+		)
+

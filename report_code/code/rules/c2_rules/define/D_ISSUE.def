@@ -1,0 +1,32 @@
+# 问题
+
+$or(
+"bug",
+"bugs",
+"challenge",
+"challenging",
+"error",
+"faceissue",
+"faceproblem",
+"facetrouble",
+"facingissue",
+"facingproblem",
+"issue",
+"issues",
+"isuee",
+"prblm",
+"prob",
+"probalms",
+"probelm",
+"problam",
+"problem",
+"problm",
+"problum",
+"trouble"
+		)
+
+$ord(@d3,"face","issue")
+$ord(@d3,"face","problem")
+$ord(@d3,"face","trouble")
+$ord(@d3,"facing","issue")
+$ord(@d3,"facing","problem")

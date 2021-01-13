@@ -1,0 +1,21 @@
+# 手机
+
+$or(
+"cellphone",
+"device",
+"handset",
+"mobile",
+"phn",
+"phon",
+"phone",
+"smartphone",
+"telephone",
+"thedevice",
+_D_OPPO,
+_D_SAMSUNG,
+_D_VIVO,
+_D_XIAOMI
+		)
+
+$ord(@d3,"smart","phone")
+$ord(@d3,"the","device")

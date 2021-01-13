@@ -1,0 +1,9 @@
+# 传感器
+
+$or(
+"gyro",
+"gyroscope",
+"sensor",
+"sensors"
+		)
+

@@ -1,0 +1,29 @@
+# 其他脸
+
+$or(
+"anyface",
+"anyfaces",
+"differentface",
+"everyface",
+"facedifferent",
+"faceother",
+"facesimilar",
+"otherface",
+"othersface",
+"similarface"
+		)
+
+$ord(@d3,"any","face")
+$ord(@d3,"any","faces")
+$ord(@d3,"different","face")
+$ord(@d3,"every","face")
+$ord(@d3,"face","different")
+$ord(@d3,"face","other")
+$ord(@d3,"face","similar")
+$ord(@d3,"other","face")
+$ord(@d3,"others","face")
+$ord(@d3,"similar","face")
+$ord(@d5,"same","face","like")
+$ord(@d4,"sameface","like")
+$ord(@d4,"same","facelike")
+$ord(@d3,"samefacelike")

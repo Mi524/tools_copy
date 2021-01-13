@@ -1,0 +1,10 @@
+# 人
+
+$or(
+"human",
+"member",
+"people",
+"person",
+"user"
+		)
+

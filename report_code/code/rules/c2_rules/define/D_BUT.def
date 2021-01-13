@@ -1,0 +1,12 @@
+# 但是
+
+$or(
+"although",
+"but",
+"despite",
+"however",
+"nonetheless",
+"though",
+"yet"
+		)
+

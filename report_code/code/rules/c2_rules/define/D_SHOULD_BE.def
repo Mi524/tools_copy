@@ -1,0 +1,14 @@
+# 应该
+
+$or(
+"canbe",
+"couldbe",
+"shallbe",
+"should",
+"shouldbe"
+		)
+
+$ord(@d3,"can","be")
+$ord(@d3,"could","be")
+$ord(@d3,"shall","be")
+$ord(@d3,"should","be")

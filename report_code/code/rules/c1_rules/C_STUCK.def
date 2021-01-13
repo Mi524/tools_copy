@@ -1,0 +1,36 @@
+# 死机
+
+$or(
+"freeze",
+"freezes",
+"frozen",
+"getblank",
+"irresponsive",
+"nonresponsive",
+"stick",
+"stoppedsuddenly",
+"strike",
+"struck",
+"strucked",
+"stuck",
+"stucked",
+"stucking",
+"stucks",
+"suddenlystop",
+"unresponsive",
+"unresponsiveness"
+		)
+
+$ord(@d3,"get","blank")
+$ord(@d3,"stopped","suddenly")
+$ord(@d3,"suddenly","stop")
+$ord(@d5,"turns","out","blank")
+$ord(@d4,"turnsout","blank")
+$ord(@d4,"turns","outblank")
+$ord(@d3,"turnsoutblank")
+$ord(@d5,_D_NOT,"responce")
+$ord(@d5,_D_NOT,"respond")
+$ord(@d5,_D_NOT,"responding")
+$ord(@d5,_D_NOT,"responds")
+$ord(@d5,_D_NOT,"response")
+$ord(@d5,_D_NOT,"responsive")

@@ -1,0 +1,16 @@
+# 注册
+
+$or(
+"accept",
+"accepting",
+"activate",
+"adddata",
+"gonethru",
+"register",
+"registered",
+"registration",
+"set"
+		)
+
+$ord(@d3,"add","data")
+$ord(@d3,"gone","thru")

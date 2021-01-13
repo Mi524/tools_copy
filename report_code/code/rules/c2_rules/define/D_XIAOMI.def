@@ -1,0 +1,10 @@
+# 小米
+
+$or(
+"redmi",
+"xiaomi",
+"xioami",
+"xiomi"
+		)
+
+$ord(@d3,"xiao","mi")

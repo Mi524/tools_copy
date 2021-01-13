@@ -1,0 +1,20 @@
+# 模糊的时间
+
+$or(
+"hours",
+"hr",
+"hrs",
+"maximumtime",
+"mins",
+"minute",
+"minutes",
+"sec",
+"second",
+"seconds",
+"sometime",
+"sometimes",
+"times"
+		)
+
+$ord(@d3,"maximum","time")
+$ord(@d3,"some","time")

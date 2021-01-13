@@ -1,0 +1,36 @@
+# 重度社交应用
+
+$or(
+"facebook",
+"fb",
+"hike",
+"instagram",
+"instagrm",
+"lineapp",
+"messenger",
+"snapchat",
+"socialapp",
+"socialnetwork",
+"truecaller",
+"twitter",
+"wats",
+"watsap",
+"watsapp",
+"wechat",
+"weixin",
+"what's",
+"whats",
+"whats",
+"whatsapp",
+"whts",
+"whtsapp"
+		)
+
+$ord(@d3,"face","book")
+$ord(@d3,"line","app")
+$ord(@d3,"social","app")
+$ord(@d3,"social","network")
+$ord(@d3,"wats","ap")
+$ord(@d3,"wats","app")
+$ord(@d3,"whats","app")
+$ord(@d3,"whts","app")

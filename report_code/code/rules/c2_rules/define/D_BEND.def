@@ -1,0 +1,11 @@
+# 弯曲变形
+
+$or(
+"bend",
+"bended",
+"bending",
+"bends",
+"bent",
+"curve"
+		)
+

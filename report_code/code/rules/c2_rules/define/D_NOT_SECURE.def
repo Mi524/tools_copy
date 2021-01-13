@@ -1,0 +1,10 @@
+# 不安全的
+
+$or(
+"insecure",
+"insecured",
+"unsecure",
+"unsecured"
+		)
+
+$ord(@d5,_D_NOT,"secure")

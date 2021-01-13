@@ -1,0 +1,10 @@
+# 连接词
+
+$or(
+"also",
+"and",
+"aswell",
+"too"
+		)
+
+$ord(@d3,"as","well")

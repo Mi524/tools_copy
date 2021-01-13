@@ -1,0 +1,14 @@
+# 屏裂
+
+$or(
+"brittle",
+"dropsdown",
+"felldown",
+"shattered"
+		)
+
+$ord(@d3,"drops","down")
+$ord(@d5,"display",_D_BROKEN)
+$ord(@d5,"screen",_D_BROKEN)
+$ord(@d5,_D_BROKEN,"display")
+$ord(@d5,_D_BROKEN,"screen")

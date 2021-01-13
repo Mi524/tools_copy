@@ -1,0 +1,24 @@
+# 电池
+
+$or(
+"backup",
+"baitri",
+"batari",
+"batery",
+"batrry",
+"battari",
+"battary",
+"batter",
+"batteree",
+"batteri",
+"battery",
+"battry",
+"betrry",
+"bettary",
+"bettery",
+"bettry",
+"packup"
+		)
+
+$ord(@d3,"back","up")
+$ord(@d3,"pack","up")

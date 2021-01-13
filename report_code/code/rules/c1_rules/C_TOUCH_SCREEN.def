@@ -1,0 +1,21 @@
+# 触摸屏类
+
+$or(
+"multi-touch",
+"multi_touch",
+"multitouch",
+"screen",
+"screetouch",
+"sensitive",
+"tauch",
+"toch",
+"touch",
+"touches",
+"touching",
+"touchpad",
+"touchpads",
+"touchpanel",
+"touchped",
+"touchscreen"
+		)
+

@@ -1,0 +1,8 @@
+# 植入
+
+$or(
+"insert",
+"inserted",
+"inserts"
+		)
+

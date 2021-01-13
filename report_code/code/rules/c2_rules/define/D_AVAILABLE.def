@@ -1,0 +1,8 @@
+# 可用的
+
+$or(
+"available",
+"used",
+"useful"
+		)
+

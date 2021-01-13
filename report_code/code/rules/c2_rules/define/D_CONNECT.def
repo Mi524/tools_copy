@@ -1,0 +1,15 @@
+# 连接
+
+$or(
+"connect",
+"connected",
+"connecting",
+"connection",
+"connections",
+"connects",
+"linkto",
+"linkup"
+		)
+
+$ord(@d3,"link","to")
+$ord(@d3,"link","up")

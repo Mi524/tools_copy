@@ -1,0 +1,14 @@
+# 突然
+
+$or(
+"sudden",
+"suddenly"
+		)
+
+$ord(@d6,"all","of","a","sudden")
+$ord(@d5,"allof","a","sudden")
+$ord(@d5,"all","ofa","sudden")
+$ord(@d5,"all","of","asudden")
+$ord(@d4,"allofa","sudden")
+$ord(@d4,"all","ofasudden")
+$ord(@d3,"allofasudden")

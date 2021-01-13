@@ -1,0 +1,19 @@
+# 浏览器类
+
+$or(
+"brouzing",
+"browing",
+"browse",
+"browser",
+"browsers",
+"browsing",
+"chrome",
+"opennet",
+"surfing",
+"webpage",
+"website"
+		)
+
+$ord(@d3,"open","net")
+$ord(@d3,"web","page")
+$ord(@d3,"web","site")

@@ -1,0 +1,36 @@
+# 游戏
+
+$or(
+"asphalt",
+"asphalt8",
+"clash",
+"doodlearmy",
+"dreamleague",
+"game",
+"games",
+"gaming",
+"mini",
+"mobilelegend",
+"nba2k18",
+"nova",
+"nova3",
+"pbug",
+"pgub",
+"pokemon",
+"pokemongo",
+"psych",
+"pubg",
+"soccer",
+"templerun",
+"wwe2k18"
+		)
+
+$ord(@d3,"doodle","army")
+$ord(@d3,"dream","league")
+$ord(@d3,"mobile","legend")
+$ord(@d3,"pokemon","go")
+$ord(@d3,"temple","run")
+$ord(@d5,"clash","of","clans")
+$ord(@d4,"clashof","clans")
+$ord(@d4,"clash","ofclans")
+$ord(@d3,"clashofclans")

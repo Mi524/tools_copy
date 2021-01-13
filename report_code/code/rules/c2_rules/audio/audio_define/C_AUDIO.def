@@ -1,0 +1,34 @@
+# 音频
+
+$or(
+"audio",
+"audios",
+"ear",
+"earbud",
+"earbuds",
+"earjack",
+"earphn",
+"earphone",
+"earphones",
+"earpiece",
+"headphone",
+"headphones",
+"headset",
+"loudspeaker",
+"ouputspeaker",
+"outputvoice",
+"outspeaker",
+"outvoice",
+"sound",
+"speaker",
+"voice",
+"vol",
+"volume",
+"volumn"
+		)
+
+$ord(@d3,"ear","jack")
+$ord(@d3,"head","phone")
+$ord(@d3,"head","set")
+$ord(@d3,"out","voice")
+$ord(@d3,"output","voice")

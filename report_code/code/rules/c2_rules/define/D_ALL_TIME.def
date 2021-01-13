@@ -1,0 +1,19 @@
+# 全部时间
+
+$or(
+"alltime",
+"alltimes",
+"everytime",
+"wholetime",
+"wholetimes"
+		)
+
+$ord(@d3,"all","time")
+$ord(@d3,"all","times")
+$ord(@d3,"every","time")
+$ord(@d3,"whole","time")
+$ord(@d3,"whole","times")
+$ord(@d5,"all","the","time")
+$ord(@d4,"allthe","time")
+$ord(@d4,"all","thetime")
+$ord(@d3,"allthetime")

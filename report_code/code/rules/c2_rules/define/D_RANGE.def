@@ -1,0 +1,10 @@
+# 覆盖
+
+$or(
+"cover",
+"coverage",
+"distance",
+"range",
+"scope"
+		)
+

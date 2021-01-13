@@ -1,0 +1,16 @@
+# 闪光灯|指示灯类
+
+$or(
+"flash",
+"flashlight",
+"flashlite",
+"light",
+"lights",
+"lightsup",
+"lightup",
+"litsup",
+"litup"
+		)
+
+$ord(@d3,"lit","up")
+$ord(@d3,"lits","up")

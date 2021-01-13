@@ -1,0 +1,10 @@
+# 自己
+
+$or(
+"me",
+"mine",
+"my",
+"myself",
+"ourselves"
+		)
+

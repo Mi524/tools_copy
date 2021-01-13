@@ -1,0 +1,34 @@
+说明：计算外销口碑报告的数据库需要构建的内容
+
+（1）用来存储基础电商数据和中间计算表+结果表的表结构；需要复制一份完全相同的表结构到目的库（带有temp开头的表头非必须）
+（2）用来计算报告结果的函数(Function)以及存储过程(Procedures)
+
+导出全部数据表结构和存储过程的语法：
+（1）mysqldump 导出所有表结构
+（中间计算表以及计算结果表都可以通过基础数据表获得，只导出基本表结构，不带表数据）
+mysqldump -u root -p --no-data web_data> d:\\web_data_table_structures.sql
+
+（2）导出所有function + procedures + triggers 
+mysqldump -u root -p --routines --no-create-info --no-data --no-create-db --skip-opt web_data> d:\\web_data_procedures.sql
+
+
+（3）导出关键的基础表以及几张计算用到的基础匹配表
+D:\My Documents\Documents\vchat\NewChatFiles\dump_from_sql
+通过dump_backup_tables.py脚本导出所有需要备份的表
+
+
+（4）安装好MySQL8.0之后,将表结构和存储过程重新存入新的数据库
+create database web_data; #创建新的web_data
+use web_data;  
+
+#可以直接运行导出来的语句
+web_data_table_structures.sql
+web_data_procedures.sql
+
+(5)通过load_backup_tables.py脚本把需要导入的基础数据和基础匹配表数据导入
+(数据量大的表，需要删掉主键和索引再导入，导入完成后再创建主键和索引)
+
+(6)测试报告生成脚本能否正常运行
+
+
+	

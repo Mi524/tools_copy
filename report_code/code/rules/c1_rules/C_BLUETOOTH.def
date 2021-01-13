@@ -1,0 +1,8 @@
+# 蓝牙
+
+$or(
+"blueteeth",
+"bluetooth"
+		)
+
+$ord(@d3,"blue","tooth")

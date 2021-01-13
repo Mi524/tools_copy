@@ -1,0 +1,343 @@
+Public Function adjustTitle(ChtObj As Variant) As Variant
+    With ChtObj.Chart
+        '修改标题字体
+        .ChartTitle.Font.Name = "微软雅黑"
+        .ChartTitle.Font.Color = RGB(10, 10, 10)
+        .ChartTitle.Font.Size = 14
+    End With
+End Function
+
+
+Public Function adjustX(ChtObj As Variant, offset As Long) As ChartObject
+    With ChtObj.Chart
+        '修改X轴的字体，报错的话应该是遇到了不支持X轴的图形
+        .Axes(xlCategory).TickLabels.Font.Name = "微软雅黑"
+        .Axes(xlCategory).TickLabels.Font.Color = RGB(20, 20, 20)
+        .Axes(xlCategory).TickLabels.Font.Size = 9
+        .Axes(xlCategory).TickLabels.offset = offset
+    End With
+End Function
+
+Public Function adjustX_seriesPointDict(ChtObj As Variant, offset As Long, seriesPointDict As Variant) As ChartObject
+    '加入seriesPointsDict的判断，如果字典出现-2，则x轴offset 400，否则就是输入的offset
+    For Each varKey In seriesPointDict
+        For Each va In seriesPointDict(varKey)
+            If va = -2 Then
+                offset = 400
+            End If
+        Next va
+    Next varKey
+    
+    With ChtObj.Chart
+        '修改X轴的字体，报错的话应该是遇到了不支持X轴的图形
+        .Axes(xlCategory).TickLabels.Font.Name = "微软雅黑"
+        .Axes(xlCategory).TickLabels.Font.Color = RGB(20, 20, 20)
+        .Axes(xlCategory).TickLabels.Font.Size = 9
+        .Axes(xlCategory).TickLabels.offset = offset
+    End With
+End Function
+
+Public Function adjustY(ChtObj As Variant, offset As Long) As ChartObject
+    With ChtObj.Chart
+        '修改Y轴的字体
+        .Axes(xlValue).TickLabels.Font.Name = "微软雅黑"
+        .Axes(xlValue).TickLabels.Font.Color = RGB(10, 10, 10)
+        .Axes(xlValue).TickLabels.Font.Size = 9
+        .Axes(xlValue).TickLabels.offset = offset
+    End With
+End Function
+
+
+Public Function adjustLegend(ChtObj As Variant) As ChartObject
+    With ChtObj.Chart
+        '修改Legend的字体
+        '.Legend.Font.Name = "微软雅黑"
+        '.Legend.Font.Color = RGB(10, 10, 10)
+        '.Legend.Font.Size = 10.5
+    End With
+End Function
+
+Public Function adjustSeriesColors(ChtObject As Variant) As Variant
+
+    Dim colorDict As Object
+    '品牌对应颜色的字典
+    Set colorDict = CreateObject("Scripting.Dictionary")
+    colorDict.Add "售后", RGB(128, 100, 162)
+    colorDict.Add "意见反馈", RGB(0, 112, 192)
+    colorDict.Add "网络", RGB(192, 80, 77)
+
+    For Each SeriesObj In ChtObject.Chart.SeriesCollection
+        '调整系列基本格式
+        With SeriesObj
+            '线条粗细 1磅
+            ' Series.Format.Line.Weight = 1
+            '线条覆盖对应的品牌 颜色
+            .Format.Line.ForeColor.RGB = colorDict(.Name)
+            '是否做平滑曲线, 只对线形图有效
+            '.Smooth = True
+            'Marker的大小
+           ' .MarkerSize = 6
+            '线条标的颜色，background是轮廓颜色，foreground是内部填充部分的颜色
+            .MarkerBackgroundColor = colorDict(.Name)
+            .MarkerForegroundColor = colorDict(.Name)
+            '线条Marker的形状-菱形 2 圆形 8 颜色和Line一致,无线条Marker -4142
+            '.MarkerStyle = -8
+        End With
+    Next SeriesObj
+End Function
+
+
+Public Function adjustFixPositionDataLabel(ChtObject As Variant) As Variant
+    '已经调整过标签上下位置，这里只是给最后一个数据标签加上series name，其他的都不动
+    For Each Series In ChtObject.Chart.SeriesCollection
+        With Series
+            '统一清理掉数据标签
+            '.HasDataLabels = False
+
+            '防止读取不到颜色
+            'ChartType = Series.ChartType
+            'Series.ChartType = 51
+            
+            '记录每个series从后面数第几个数字不是空
+            lastNullIndex = 0
+            resetTrigger = 0
+            pointCount = Series.Points.Count
+            sValues = Series.Values
+            For i = pointCount To 1 Step -1
+                If resetTrigger = 0 And sValues(i) = "" Then
+                    lastNullIndex = lastNullIndex + 1
+                Else:
+                    resetTrigger = 1
+                End If
+            Next
+            
+            lastValueIndex = pointCount - lastNullIndex
+        End With
+        
+        '数值标签格式
+        pointCounter = 0
+        For Each Point In Series.Points
+            pointCounter = pointCounter + 1
+        
+            With Point
+                '.HasDataLabel = True
+                '最后一个标签显示 系列+数值
+                If pointCounter = lastValueIndex Then
+                    .ApplyDataLabels ShowPercentage:=True, ShowSeriesName:=True
+                Else:
+                    .ApplyDataLabels ShowPercentage:=True, ShowSeriesName:=False
+                End If
+                
+                '数字标签格式调整
+                '.DataLabel.Position = 2
+                .DataLabel.Font.Color = Series.Format.Line.ForeColor
+                .DataLabel.Font.Name = "微软雅黑"
+                .DataLabel.Font.Size = 9
+            End With
+        Next Point
+    
+    'Series.ChartType = ChartType
+    Next Series
+   
+End Function
+
+Public Function adjustDataLabelPosition(ChtObject As Variant, seriesPointDict As Variant) As Variant
+    'positionArray记录的是原始表格数据标签应在的位置
+    
+    seriesCounter = 0
+
+    For Each Series In ChtObject.Chart.SeriesCollection
+        '标签位置表的每一行,Series的顺序应该和原始数据表的顺序相同？
+        sName = Series.Name
+        For i = 0 To seriesPointDict(sName).Count - 1
+            '数字标签格式位置移动
+            With Series.Points(i + 1)
+                .HasDataLabel = True
+                If seriesPointDict(sName)(i) <= -1 Then
+                    .DataLabel.Position = 1  '1 below
+                Else:
+                    .DataLabel.Position = 0
+                End If
+                
+            End With
+            
+        Next i
+    
+        seriesCounter = seriesCounter + 1
+
+    Next Series
+    
+End Function
+
+
+Public Function seriesPointDict(Rng As Variant) As Variant
+                            
+   '这里注意后面作为参数调用的时候要直接写seriesPointDict(Rng), 写seriesPointDict = seriesPointDict(Rng) 会提示类型不匹配
+    Dim myValuesArray() As Variant
+    Dim rowCounter As Long
+    Dim columnCounter As Long
+    
+    myValuesArray = Rng.Value
+    
+    '找出表格中的最大最小值
+    MaxNumber = Application.WorksheetFunction.Max(myValuesArray)
+    MinNumber = Application.WorksheetFunction.Min(myValuesArray)
+    
+    '将整个表格的极差值初始化作为默认的最小差值
+    maximumDiff = Round(MaxNumber - MinNumber, 4)
+    
+    '以下是初始化一个动态的array数据组，后面用来储存标签上下位置
+    Set seriesPointDict_x = CreateObject("Scripting.Dictionary")
+    
+    '循环行,第一行第一列 不是数字
+    For rowCounter = LBound(myValuesArray, 1) + 1 To UBound(myValuesArray, 1)
+        '获取该行的系列名称
+        seriesName = myValuesArray(rowCounter, 1)
+        
+        Set pointPositionArray = CreateObject("System.Collections.ArrayList")
+        
+        For columnCounter = LBound(myValuesArray, 2) + 1 To UBound(myValuesArray, 2)
+            closestDiff = maximumDiff
+
+            '每行的一个数据点和这个点所在列的数据进行对比
+            currentNumber = myValuesArray(rowCounter, columnCounter)
+
+
+            EntireColumn = Application.WorksheetFunction.Index(myValuesArray, 0, columnCounter)
+            
+            For columnRow = LBound(EntireColumn, 1) + 1 To UBound(EntireColumn, 1)
+                compareNumber = EntireColumn(columnRow, 1)
+                
+                '和该列的其他数值对比大小,找出和这个数值点最近的一个点，选择往最近点的另一个边记录标签的位置 (位于线条上或者下)
+                If rowCounter <> columnRow And currentNumber <> "" Then
+                    compareDiff = currentNumber - compareNumber
+
+                    '如果当前的差值小于记录的最小差值,替换掉成当前点对于该列其他点的最小差值
+                    If Abs(compareDiff) < Abs(closestDiff) Then
+                        closestDiff = compareDiff
+                     End If
+
+                End If
+            Next columnRow
+            
+            '假设图高8厘米，每条线的空间是8/UBound(myValuesArray, 1) - 1, X9是因为一般图上下边界都比极差值大一点
+            If Abs(closestDiff) / maximumDiff * 9 < 8 / (UBound(myValuesArray, 1) - 1) Then
+                If closestDiff < 0 Then   '如果当前数字比最相邻数字大，标在下方
+                    '方便计算X轴标签是否需要往下移，如果这个标在下方的数字距离图表X轴的距离小于0.7厘米，记录为-2
+                    If currentNumber / maximumDiff * 8 <= 0.7 Then
+                        pointPositionArray.Add (-2)
+                    Else:
+                        pointPositionArray.Add (-1)
+                    End If
+                Else:
+                    pointPositionArray.Add (1)
+                End If
+            Else:
+                pointPositionArray.Add (1)
+            End If
+            
+        Next columnCounter
+        
+        seriesPointDict_x.Add seriesName, pointPositionArray
+        
+    Next rowCounter
+    
+    Set seriesPointDict = seriesPointDict_x
+
+End Function
+
+Sub drawNegativeRate()
+    
+    Dim RowCount As Long
+    Dim valueRowCount As Long
+    Dim negativeFirstRow As Long
+    Dim titleValueArray As Variant
+    
+    For Each ws In Worksheets
+        '记录第一列最远的行
+        RowCount = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row + 1
+        '记录第一行最远的列
+        ColumnCount = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+        valueRowCount = 0
+        '记录画过几个表格
+        drawNum = 0
+        '循环读取占比的表格
+        For i = 1 To RowCount
+            sta = InStr(ws.Cells(i, 1).Value, "占比")
+            
+            '读取这个表格前面文字，获取图表标题
+            If IsEmpty(ws.Cells(i, 1)) = False Then
+                titleValueArray = Split(ws.Cells(i, 1).Value, "-")
+                If IsEmpty(titleValueArray) = True Then
+                    titleValue = ""
+                Else:
+                    titleValue = Replace(Replace(titleValueArray(0), "负向口碑占比", ""), "卡顿", "不流畅")
+                End If
+            End If
+
+            '如果是带有占比标签的表格
+            If sta > 0 Then
+                '记录负向占比的行
+                negativeFirstRow = i
+                '获取负向占比本行最长的列数
+                valueRowCount = negativeFirstRow
+                
+                '记录这个表格是否已经画过，防止下面重复上面的i循环
+                drewTag = 0
+                For r = negativeFirstRow To RowCount
+                    If drewTag = 0 Then
+                        If IsEmpty(ws.Cells(r, 1).Value) = False Then
+                            valueRowCount = valueRowCount + 1
+                        Else
+                            Set Rng = ws.Range(ws.Cells(negativeFirstRow, 1), ws.Cells(valueRowCount - 1, ColumnCount))
+
+                            '创建图表
+                            Set cht = ws.Shapes.AddChart2
+                            cht.Chart.ChartType = 65
+                            cht.Chart.SetSourceData Source:=Rng
+                            cht.Chart.HasTitle = True
+                            cht.Chart.ChartTitle.Text = titleValue & " " & Replace(ws.Name, "重点管控项", "")
+                            
+                            '调整图表border line和背后gridline颜色深度
+                            cht.Line.ForeColor.RGB = RGB(160, 160, 160)
+                            'cht.Chart.Axes(xlValue).MajorGridlines.Border.Color = RGB(160, 160, 160)
+                            'cht.Chart.PlotArea.InsideTop = 30
+                            
+                            '去掉legend
+                            cht.Chart.HasLegend = False
+                            
+                            '调用修改标题和标签的函数
+                            adjustTitle cht
+                            '调整系列对应颜色
+                            adjustSeriesColors cht
+                            '调整标签上下位置
+                            adjustDataLabelPosition cht, seriesPointDict(Rng)
+                            
+                            '调整标签字体等
+                            adjustFixPositionDataLabel cht
+                            
+                            '调整表格大小
+                            cht.Height = 10 * 28.35   '图高10厘米
+                            cht.Width = 27 * 28.35    '图宽27厘米
+           
+                            '移动表格位置
+                            graphRow = RowCount + 2 + drawNum * 24
+                            
+                            cht.Left = ws.Range(ws.Cells(graphRow, 2), ws.Cells(graphRow, 2)).Left
+                            cht.Top = ws.Range(ws.Cells(graphRow, 2), ws.Cells(graphRow, 2)).Top
+
+                            '调整X,Y轴的标签以及X轴画图区域plotarea和ticklabels的距离
+                            adjustX_seriesPointDict cht, 100, seriesPointDict(Rng)
+                            adjustY cht, 100
+                            
+                            valueRowCount = 0
+                            drewTag = 1
+                            drawNum = drawNum + 1
+                            
+                        End If
+                    End If
+                Next r
+            End If
+        Next i
+    Next ws
+End Sub

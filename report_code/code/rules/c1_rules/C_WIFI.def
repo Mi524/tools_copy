@@ -1,0 +1,18 @@
+# Wi-Fi类
+
+$or(
+"hotspot",
+"wi_fi",
+"wif",
+"wifi",
+"wifi-hotspot",
+"wifi_hotspot",
+"wireles",
+"wireless",
+"wirelesshotspot",
+"wlan"
+		)
+
+$ord(@d3,"hot","spot")
+$ord(@d3,"wi","fi")
+$ord(@d3,"wireless","hotspot")

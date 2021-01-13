@@ -1,0 +1,22 @@
+# 闪退
+
+$or(
+"close",
+"closewithin",
+"cracks",
+"crash",
+"crashes",
+"crashing",
+"exit",
+"quit",
+"shutoff",
+"shutsdown"
+		)
+
+$ord(@d3,"close","within")
+$ord(@d3,"shut","off")
+$ord(@d3,"shuts","down")
+$ord(@d5,"back","to","automatically")
+$ord(@d4,"backto","automatically")
+$ord(@d4,"back","toautomatically")
+$ord(@d3,"backtoautomatically")

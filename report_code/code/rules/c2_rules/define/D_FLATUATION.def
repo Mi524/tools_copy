@@ -1,0 +1,18 @@
+# 波动
+
+$or(
+"fluctuate",
+"fluctuates",
+"fluctuatiing"
+		)
+
+$ord(@d5,"now","and","then")
+$ord(@d4,"nowand","then")
+$ord(@d4,"now","andthen")
+$ord(@d3,"nowandthen")
+$ord(@d5,"up","and","down")
+$ord(@d4,"upand","down")
+$ord(@d4,"up","anddown")
+$ord(@d3,"upanddown")
+$ord(@d5,_D_NOT,"consistant")
+$ord(@d5,_D_NOT,"stable")

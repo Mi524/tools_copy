@@ -1,0 +1,10 @@
+# 缝隙
+
+$or(
+"dent",
+"gap"
+		)
+
+$ord(@d5,_D_NOT,"close")
+$ord(@d5,_D_NOT,"fit")
+$ord(@d5,_D_NOT,"shut")

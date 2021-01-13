@@ -1,0 +1,14 @@
+# 掉漆
+
+$or(
+"fade",
+"faded",
+"fading",
+"loosepaint",
+"losingcolor",
+"losscolor"
+		)
+
+$ord(@d3,"loose","paint")
+$ord(@d3,"losing","color")
+$ord(@d3,"loss","color")

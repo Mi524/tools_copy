@@ -1,0 +1,10 @@
+# 不流畅
+
+$or(
+"intermittent",
+"jem",
+"jemmed"
+		)
+
+$ord(@d5,_D_NOT,"fluently")
+$ord(@d5,_D_NOT,"smooth")

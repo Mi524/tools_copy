@@ -1,0 +1,14 @@
+# 可操作的
+
+$or(
+"activate",
+"activated",
+"activating",
+"configure",
+"operate",
+"operator",
+"reachable",
+"service",
+"support"
+		)
+

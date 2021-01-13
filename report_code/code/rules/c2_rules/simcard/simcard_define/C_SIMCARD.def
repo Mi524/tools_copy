@@ -1,0 +1,16 @@
+# SIM卡
+
+$or(
+"holder",
+"sim",
+"sim1",
+"sim2",
+"simcard",
+"simcards",
+"simm",
+"sims",
+"simtray",
+"slot"
+		)
+
+$ord(@d3,"sim","tray")

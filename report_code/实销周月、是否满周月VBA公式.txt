@@ -1,0 +1,94 @@
+Function MARKET_MONTH(launch_date, comment_time) As Integer
+    '计算实销月, 对比的是评论日期和上市日期
+    comment_month = Year(comment_time) * 12 + Month(comment_time)
+    launch_month = Year(launch_date) * 12 + Month(launch_date)
+    
+    If Day(comment_time) >= Day(launch_date) Then
+        result = comment_month - launch_month + 1
+    Else
+        result = comment_month - launch_month
+    End If
+    
+    MARKET_MONTH = result
+    
+End Function
+
+
+Function IF_MONTH_COMPLETE(launch_date, comment_time, enddate) As Integer
+    '计算本实销月是否满月：
+    '通过对比截止日期和上市日期获取是否满月的条件,参考MYSQL已经写好的函数
+    '2月1日上市，2月底即属于满月
+    If Month(comment_time) < Month(enddate) _
+    Or Year(comment_time) < Year(enddate) _
+    Or (Month(comment_time) = Month(enddate) And Day(comment_time) < Day(launch_date)) _
+    Or (Month(comment_time) = Month(enddate) And Day(launch_date) = 1) _
+    Then
+        result = 1
+    Else
+        result = -1
+    End If
+   
+   IF_MONTH_COMPLETE = result
+   
+End Function
+
+
+Function MARKET_WEEK(launch_date As Date, comment_time As Date) As Variant
+    day_diff = DateDiff("d", launch_date, comment_time)
+    
+    If day_diff / 7 <> Application.WorksheetFunction.RoundUp(day_diff / 7, 0) Then
+        week_diff = CInt(day_diff / 7)
+    Else:
+        week_diff = CInt(day_diff / 7 + 1)
+    End If
+    
+    MARKET_WEEK = week_diff
+End Function
+
+
+Function IF_WEEK_COMPLETE(launch_date As Date, comment_time As Date, enddate As Date) As Integer
+    
+    If DateDiff("ww", launch_date, comment_time) < DateDiff("ww", launch_date, enddate) Then
+        result = 1
+    Else:
+        result = 0
+    End If
+    
+    IF_WEEK_COMPLETE = result
+
+End Function
+
+
+'加密传回的数据，数字超过3个的后面多出的数字用*号覆盖，函数需要放进模块保存才能看到
+
+Function ENCRYPTION(content As String) As String
+    result = ""
+    
+    If IsEmpty(content) = False Then
+        numberCounter = 0
+        new_content = CStr(content)
+
+        For counter = 1 To Len(new_content)
+            eachLetter = Mid(new_content, counter, 1)
+
+            If IsNumeric(eachLetter) = True Then
+                
+                numberCounter = numberCounter + 1
+                
+                If numberCounter > 3 Then
+                    result = result & "*"
+                Else:
+                    result = result & eachLetter
+                End If
+            Else:
+                numberCounter = 0
+                result = result & eachLetter
+                
+            End If
+
+        Next counter
+    End If
+    
+    ENCRYPTION = result
+
+End Function

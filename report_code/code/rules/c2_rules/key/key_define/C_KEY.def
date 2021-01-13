@@ -1,0 +1,14 @@
+# 按键类
+
+$or(
+"bottun",
+"button",
+"buttons",
+"buttun",
+"buttuns",
+"click",
+"clicking",
+"key",
+"keys"
+		)
+

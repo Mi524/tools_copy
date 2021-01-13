@@ -1,0 +1,22 @@
+# 充电类
+
+$or(
+"adapoter",
+"adapter",
+"adaptor",
+"charg",
+"chargar",
+"charge",
+"charged",
+"chargeing",
+"charger",
+"charging",
+"charing",
+"chrge",
+"plugged",
+"quickcharge",
+"recharge",
+"recharging",
+"turbocharge"
+		)
+

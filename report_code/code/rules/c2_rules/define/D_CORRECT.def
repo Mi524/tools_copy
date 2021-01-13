@@ -1,0 +1,16 @@
+# 正确的
+
+$or(
+"accurate",
+"accurately",
+"accuratly",
+"currect",
+"currectly",
+"exact",
+"exactly",
+"positive",
+"proper",
+"properly",
+"right"
+		)
+

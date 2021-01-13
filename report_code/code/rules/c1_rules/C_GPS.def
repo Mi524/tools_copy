@@ -1,0 +1,9 @@
+# GPS
+
+$or(
+"gps",
+"navigating",
+"navigation",
+"navigator"
+		)
+

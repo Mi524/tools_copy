@@ -1,0 +1,10 @@
+# 影音类
+
+$or(
+"media",
+"movieplayer",
+"video",
+"videoes"
+		)
+
+$ord(@d3,"movie","player")

@@ -1,0 +1,17 @@
+# 网络信号类
+
+$or(
+"airtel",
+"call",
+"docomo",
+"idea",
+"internet",
+"jio",
+"network",
+"signal",
+"signals",
+"signels",
+"vodafone",
+"volte"
+		)
+

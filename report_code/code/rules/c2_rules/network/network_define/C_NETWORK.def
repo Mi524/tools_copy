@@ -1,0 +1,14 @@
+# 上网类
+
+$or(
+"dataconnection",
+"dataconnectivity",
+"internet",
+"internt",
+"net",
+"network",
+"networks"
+		)
+
+$ord(@d3,"data","connection")
+$ord(@d3,"data","connectivity")

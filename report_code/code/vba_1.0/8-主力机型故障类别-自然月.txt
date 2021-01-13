@@ -1,0 +1,247 @@
+Public Function adjustTitle(ChtObj As Variant) As Variant
+    With ChtObj.Chart
+        '修改标题字体
+        .ChartTitle.Font.Name = "微软雅黑"
+        .ChartTitle.Font.Bold = False
+        .ChartTitle.Font.Color = RGB(10, 10, 10)
+        .ChartTitle.Font.Size = 14
+    End With
+End Function
+
+
+Public Function adjustX(ChtObj As Variant, offset As Long) As ChartObject
+    With ChtObj.Chart
+        '修改X轴的字体，报错的话应该是遇到了不支持X轴的图形
+        .Axes(xlCategory).TickLabels.Font.Name = "微软雅黑"
+        .Axes(xlCategory).TickLabels.Font.Color = RGB(20, 20, 20)
+        .Axes(xlCategory).TickLabels.Font.Size = 9
+        .Axes(xlCategory).TickLabels.offset = offset
+    End With
+End Function
+
+Public Function adjustY(ChtObj As Variant, offset As Long) As ChartObject
+    With ChtObj.Chart
+        '修改Y轴的字体
+        .Axes(xlValue).TickLabels.Font.Name = "微软雅黑"
+        .Axes(xlValue).TickLabels.Font.Color = RGB(10, 10, 10)
+        .Axes(xlValue).TickLabels.Font.Size = 9
+        .Axes(xlValue).TickLabels.offset = offset
+    End With
+End Function
+
+
+Public Function adjustLegend(ChtObj As Variant) As ChartObject
+    With ChtObj.Chart
+        '修改Legend的字体
+        .Legend.Font.Name = "微软雅黑"
+        .Legend.Font.Color = RGB(10, 10, 10)
+        .Legend.Font.Size = 9
+        .Legend.Position = xlLegendPositionRight
+        
+        .Legend.Top = .Legend.Top - .Legend.Top * 0.3
+        .Legend.Left = .Legend.Left - .Legend.Left * 0.05
+        
+        .Legend.Width = .Legend.Width * 1.5
+        .Legend.Height = .Legend.Height * 1.2
+
+    End With
+End Function
+
+
+Public Function lastDataLabelValue(ChtObject As Variant) As Variant
+    'Set lastDataLabelValue_x = CreateObject("Scripting.Dictionary")
+    
+    '最后一个点有数据标签，其他点都没有数据标签
+    For Each Series In ChtObject.Chart.SeriesCollection
+        With Series
+            '记录每个series从后面数第几个数字不是空
+            lastNullIndex = 0
+            resetTrigger = 0
+            pointCount = Series.Points.Count
+            sValues = Series.Values
+            For i = pointCount To 1 Step -1
+                If resetTrigger = 0 And sValues(i) = "" Then
+                    lastNullIndex = lastNullIndex + 1
+                Else:
+                    resetTrigger = 1
+                End If
+            Next
+            lastValueIndex = pointCount - lastNullIndex
+        End With
+
+        Series.HasDataLabels = False
+        
+        seriesBorderColor = Series.Border.Color
+        '最后一个点 加入数据标签
+        With Series.Points(lastValueIndex)
+            .HasDataLabel = True
+            .ApplyDataLabels ShowSeriesName:=True
+            '如果最后一个点能达到X轴的终点，数值标签往上放(above)，其他的往后面放(right)
+            If pointCount = lastValueIndex Then
+                .DataLabel.Position = xlLabelPositionAbove
+            Else:
+                .DataLabel.Position = xlLabelPositionRight
+            End If
+            '数字标签格式调整
+            .DataLabel.Font.Color = seriesBorderColor
+            .DataLabel.Font.Name = "微软雅黑"
+            .DataLabel.Font.Size = 9
+            
+            lastDataLabelText = .DataLabel.Text
+            'lastDataLabelValue_x.Add Series.Name, lastDataLabelText
+            
+            '重新赋值，固定最后一个数字标签的文本
+            .DataLabel.Text = lastDataLabelText
+        End With
+        Series.Name = Replace(lastDataLabelText, ", ", "   ")
+        
+    Next Series
+
+    'Set lastDataLabelValue = lastDataLabelValue_x
+    
+End Function
+
+Public Function adjustLine(ChtObject As Variant) As Variant
+    
+    For Each Series In ChtObject.Chart.SeriesCollection
+        Set lineColorDict = CreateObject("Scripting.Dictionary")
+        
+        With Series
+            random_color = Series.Border.Color
+
+            rgb_r = random_color Mod 256
+            rgb_g = random_color / 256 Mod 256
+            rgb_b = random_color / 65536 Mod 256
+            
+            lineColorDict.Add "red", rgb_r
+            lineColorDict.Add "green", rgb_g
+            lineColorDict.Add "blue", rgb_b
+        
+
+            '求出最大的rgb,稍微加亮一点原始主导的颜色
+            MaxRGB = WorksheetFunction.Max(lineColorDict.items)
+
+            For Each Key In lineColorDict
+                If lineColorDict(Key) = MaxRGB Then
+                    lineColorDict(Key) = lineColorDict(Key) * 1.1
+                End If
+            Next Key
+            
+            
+            Series.Border.Color = RGB(lineColorDict("red"), lineColorDict("green"), lineColorDict("blue"))
+            Series.Format.Line.ForeColor.RGB = RGB(lineColorDict("red"), lineColorDict("green"), lineColorDict("blue"))
+            '调整颜色亮度，负值是往颜色深的方向调,正值往颜色轻的方向调，取值范围-1到+1
+            Series.Format.Line.ForeColor.Brightness = -0.2
+            
+            '.Smooth = True
+            .MarkerStyle = xlMarkerStyleCircle
+            .MarkerSize = 4
+            .Format.Line.Weight = 2
+        End With
+    Next Series
+End Function
+
+Sub drawNegativeRate()
+    
+    Dim RowCount As Long
+    Dim valueRowCount As Long
+    Dim negativeFirstRow As Long
+    Dim titleValueArray As Variant
+    
+    For Each ws In Worksheets
+        '记录第一列最远的行
+        RowCount = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row + 1
+        '记录第一行最远的列
+        ColumnCount = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+        valueRowCount = 0
+        '记录画过几个表格
+        drawNum = 0
+        '循环读取占比的表格
+        For i = 1 To RowCount
+            sta = InStr(ws.Cells(i, 1).Value, "占比")
+            
+            '读取这个表格前面文字，获取图表标题
+            If IsEmpty(ws.Cells(i, 1)) = False Then
+                titleValueArray = Split(ws.Cells(i, 1).Value, "-")
+                If IsEmpty(titleValueArray) = True Then
+                    titleValue = ""
+                Else:
+                    titleValue = Replace(titleValueArray(0), "累计负向口碑占比", "")
+                End If
+            End If
+            
+            '如果是带有占比标签的表格
+            If sta > 0 Then
+                '记录负向占比的行
+                negativeFirstRow = i
+                '获取负向占比本行最长的列数
+                valueRowCount = negativeFirstRow
+                
+                '记录这个表格是否已经画过，防止下面重复上面的i循环
+                drewTag = 0
+                For r = negativeFirstRow To RowCount
+                    If drewTag = 0 Then
+                        If IsEmpty(ws.Cells(r, 1).Value) = False Then
+                            valueRowCount = valueRowCount + 1
+                        Else
+                            Set Rng = ws.Range(ws.Cells(negativeFirstRow, 1), ws.Cells(valueRowCount - 1, ColumnCount))
+
+                            '创建图表
+                            
+                            '调整表格大小, 如果数据组的机型超过12个高14厘米，否则图12厘米
+                            If valueRowCount - 1 - negativeFirstRow >= 13 Then
+                                chtHeight = 14 * 28.35   '图高14厘米
+                                chtWidth = 28 * 28.35    '图宽28厘米
+                            Else:
+                                chtHeight = 12 * 28.35   '图高12厘米
+                                chtWidth = 28 * 28.35    '图宽28厘米
+                            End If
+                            
+                            Set cht = ws.ChartObjects.Add(Left:=10, Top:=400, Width:=chtWidth, Height:=chtHeight)
+                            'cht.Chart.ChartType = 65
+                            cht.Chart.ChartType = xlLineMarkers
+                            'PlotBy修改 以实销月做x轴
+                            cht.Chart.SetSourceData Source:=Rng, PlotBy:=xlRows
+                            cht.Chart.HasTitle = True
+                            cht.Chart.ChartTitle.Text = "主力机型 " & Replace(titleValue, "卡顿", "不流畅") & " " & "自然月 负向口碑占比对比趋势图"
+                            
+                            '调整图表border line和背后gridline颜色深度
+                            'cht.Line.ForeColor.RGB = RGB(160, 160, 160)
+                            'cht.Chart.Axes(xlValue).MajorGridlines.Border.Color = RGB(160, 160, 160)
+                            
+                            cht.Chart.HasLegend = True
+                            
+                            '调用修改标题和标签的函数
+                            adjustTitle cht
+                            adjustLegend cht
+                            
+                            adjustLine cht
+                            lastDataLabelValue cht
+
+                        
+                            '移动表格位置
+                            graphRow = RowCount + 1 + drawNum * 30
+                            
+                            cht.Left = ws.Range(ws.Cells(graphRow, 1), ws.Cells(graphRow, 1)).Left + 30
+                            cht.Top = ws.Range(ws.Cells(graphRow, 1), ws.Cells(graphRow, 1)).Top
+
+                             
+                            '调整X,Y轴的标签以及X轴画图区域plotarea和ticklabels的距离
+                            adjustX cht, 100
+                            adjustY cht, 100
+                            
+                            valueRowCount = 0
+                            drewTag = 1
+                            drawNum = drawNum + 1
+                            
+                        End If
+                    End If
+                Next r
+            End If
+        Next i
+    Next ws
+    
+End Sub
+
+
+

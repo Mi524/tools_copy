@@ -1,0 +1,8 @@
+# SAMSUNG
+
+$or(
+"samsung",
+"sansung"
+		)
+
+$ord(@d3,"sam","sung")

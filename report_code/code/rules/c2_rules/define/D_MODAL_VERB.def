@@ -1,0 +1,22 @@
+# 情态动词
+
+$or(
+"goingto",
+"hasto",
+"haveto",
+"may",
+"must",
+"needto",
+"oughtto",
+"shall",
+"usedto",
+"will",
+"would"
+		)
+
+$ord(@d3,"going","to")
+$ord(@d3,"has","to")
+$ord(@d3,"have","to")
+$ord(@d3,"need","to")
+$ord(@d3,"ought","to")
+$ord(@d3,"used","to")

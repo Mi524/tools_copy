@@ -1,0 +1,20 @@
+# 快
+
+$or(
+"efficient",
+"fast",
+"faster",
+"fastest",
+"immediately",
+"instant",
+"instantly",
+"quick",
+"quickly",
+"rightaway",
+"sensitive",
+"smooth",
+"smoothly",
+"soon"
+		)
+
+$ord(@d3,"right","away")

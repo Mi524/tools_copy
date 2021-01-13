@@ -1,0 +1,25 @@
+# be动词
+
+$or(
+"are",
+"been",
+"being",
+"canbe",
+"couldbe",
+"is",
+"tobe",
+"was",
+"were",
+"willbe",
+"wouldbe"
+		)
+
+$ord(@d3,"can","be")
+$ord(@d3,"could","be")
+$ord(@d3,"to","be")
+$ord(@d3,"will","be")
+$ord(@d3,"would","be")
+$ord(@d5,"going","to","be")
+$ord(@d4,"goingto","be")
+$ord(@d4,"going","tobe")
+$ord(@d3,"goingtobe")

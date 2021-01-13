@@ -1,0 +1,10 @@
+# 其他
+
+$or(
+"another",
+"anyother",
+"every",
+"other"
+		)
+
+$ord(@d3,"any","other")

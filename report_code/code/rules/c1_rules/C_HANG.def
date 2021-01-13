@@ -1,0 +1,32 @@
+# 反应慢|卡顿类
+
+$or(
+"haging",
+"hang",
+"hange",
+"hanged",
+"hanger",
+"hanges",
+"hangged",
+"hanging",
+"hangoff",
+"hangup",
+"heng",
+"hung",
+"hunge",
+"hunging",
+"lag",
+"laggy",
+"laginess",
+"ramlow",
+"respond",
+"resposive",
+"slow",
+"slowdown",
+"slowness",
+"stuck"
+		)
+
+$ord(@d3,"hang","off")
+$ord(@d3,"hang","up")
+$ord(@d3,"ram","low")

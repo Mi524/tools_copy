@@ -1,0 +1,20 @@
+# 关闭
+
+$or(
+"close",
+"getoff",
+"switchof",
+"switchoff",
+"switchofff",
+"turnof",
+"turnoff",
+"turnofff"
+		)
+
+$ord(@d3,"get","off")
+$ord(@d3,"switch","of")
+$ord(@d3,"switch","off")
+$ord(@d3,"switch","offf")
+$ord(@d3,"turn","of")
+$ord(@d3,"turn","off")
+$ord(@d3,"turn","offf")

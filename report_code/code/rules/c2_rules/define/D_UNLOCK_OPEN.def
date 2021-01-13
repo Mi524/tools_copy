@@ -1,0 +1,24 @@
+# 解锁或打开
+
+$or(
+"geton",
+"gettingon",
+"lock",
+"open",
+"opens",
+"switchon",
+"turningon",
+"turnon",
+"turnson",
+"unlock",
+"unlocked",
+"unlocking",
+"unlocks"
+		)
+
+$ord(@d3,"get","on")
+$ord(@d3,"getting","on")
+$ord(@d3,"switch","on")
+$ord(@d3,"turn","on")
+$ord(@d3,"turning","on")
+$ord(@d3,"turns","on")

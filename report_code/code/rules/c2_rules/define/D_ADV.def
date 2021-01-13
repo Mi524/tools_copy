@@ -1,0 +1,22 @@
+# 副词
+
+$or(
+"accurately",
+"asexpected",
+"currectly",
+"decently",
+"proper",
+"properly",
+"quickly",
+"smooth",
+"smoothly"
+		)
+
+$ord(@d3,"as","expected")
+$ord(@d6,"in","a","decent","way")
+$ord(@d5,"ina","decent","way")
+$ord(@d5,"in","adecent","way")
+$ord(@d5,"in","a","decentway")
+$ord(@d4,"inadecent","way")
+$ord(@d4,"in","adecentway")
+$ord(@d3,"inadecentway")

@@ -1,0 +1,21 @@
+# 被毁坏的
+
+$or(
+"break-up",
+"breakup",
+"broke",
+"broken",
+"corrupted",
+"crack",
+"crush",
+"crushed",
+"damage",
+"damaged",
+"destroy",
+"destroyed",
+"fracture",
+"shattered",
+"tattered"
+		)
+
+$ord(@d3,"break","up")
