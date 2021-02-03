@@ -1,0 +1,1 @@
+delete from warning_test where osversion is null or osversion = '' or source != '意见反馈'  ;

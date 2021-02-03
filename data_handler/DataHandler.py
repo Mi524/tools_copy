@@ -16,6 +16,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import argparse
+import sqlite3 
 
 import hashlib
 from collections import defaultdict, Counter
@@ -27,6 +28,7 @@ from common_utils.excel_functions import write_format_columns
 from common_utils.regex_functions import replace_re_special, replace_punctuations
 from common_utils.decorator_functions import df_row_num_decorator, get_run_time
 from common_utils.data_handle_func import *
+from common_utils.sql_functions import close_sql_connection
 from common_utils.data_handle_sheet_func import Handler
 
 
@@ -68,62 +70,67 @@ class DataHandler(object):
 			process_counter = -1
 			for process, table in self.table_dict.items():
 				process_counter += 1
+				process_lower = process.lower().strip()
 
-				if 'standardization' in process.lower() and not table.empty:
-					print(f'[{process_counter}] Standardizing columns...')
+				if process not in ['complete_header_df', 'target_cn_columns' ]:
+					print(f'[{process_counter}] {process} config processing...')
+
+				if 'standardization' in process_lower and not table.empty:
 					complete_header_df, partial_match_failed_df = self.handler.standardize_columns(complete_header_df, table)
 					checking_result_list.append(partial_match_failed_df)
 					checking_result_sheet_names.append('Fail to standardize')
 
-				if 'split' in process.lower() and not table.empty:
-					print(f'[{process_counter}] Spliting columns...')
+				if 'split' in process_lower and not table.empty:
 					complete_header_df = self.handler.split_columns(complete_header_df, table)
 
-				if 'match' in process.lower() and not table.empty:
-					print(f'[{process_counter}] Matching columns...')
+				if 'match' in process_lower and not table.empty:
 					complete_header_df, not_match_df = self.handler.match_columns(complete_header_df, table)
 					checking_result_sheet_names.append('Fail to match')
 					checking_result_list.append(not_match_df)
 
-				if'deduplication' in process.lower() and not table.empty:
-					print(f'[{process_counter}] Dropping duplicated data...')
+				if'deduplication' in process_lower and not table.empty:
 					complete_header_df = self.handler.drop_duplicate_data(complete_header_df, table)
 					
 				# 先做过滤再输出结果
-				if 'filter' in process.lower() and not table.empty:
-					print(f'[{process_counter}] Filtering result...')
+				if 'filter' in process_lower and not table.empty:
 					complete_header_df = self.handler.filter_columns(complete_header_df, table)
 
-				if 'extraction' in process.lower() and not table.empty:
-					print(f'[{process_counter}] Extracting target content...')
+				if 'extraction' in process_lower and not table.empty:
 					complete_header_df = self.handler.regex_extraction(complete_header_df, table)
 
 				#用作统计规则
-				if 'time process' in process.lower() and not table.empty:
-					print(f'[{process_counter}] {process} config processing...')
+				if 'time process' in process_lower and not table.empty:
 					complete_header_df = self.handler.calc_time(complete_header_df, table)
 
-				if 'statistic group' in process.lower() and not table.empty:
+				if 'statistic group' in process_lower and not table.empty:
 					#不同的sheet里面必须确保填入的分组完全相同
-					print(f'[{process_counter}] {process} config processing...')
 					complete_header_df = self.handler.process_statistic_groups(complete_header_df,table)
 
-				if 'calculations' in process.lower() and not table.empty:
-					print(f'[{process_counter}] {process} config processing...')
+				if 'calculations' in process_lower and not table.empty:
 					complete_header_df = self.handler.process_calculations(complete_header_df,table)
 					
-				if 'fill&sort' in process.lower() and not table.empty:
-					print(f'[{process_counter}] {process} config processing...')
+				if 'pivot' in process_lower and not table.empty:
+					complete_header_df = self.handler.pivot_table(complete_header_df,table)
 
+				if 'connection' in process_lower and not table.empty:
+					#connection config sheet have to be before sql/write to db sheet
+					#不会返回任何结果,conn, db,已经在函数中传进handler的属性
+					complete_header_df = self.handler.exec_connection(complete_header_df, table)
+
+				if 'sql' in process_lower and not table.empty:
+					#transaction设置等待半小时 60 * 60 * 30 = 1800000 miliseconds
+					complete_header_df = self.handler.exec_sql(complete_header_df, table)
+
+				if 'write to db' in process_lower and not table.empty:
+					#写入数据表操作不会返回任何结果
+					complete_header_df = self.handler.exec_write_to_db(complete_header_df,table)
+
+				if 'fill&sort' in process_lower and not table.empty:
 					complete_header_df = self.handler.fill_and_sort_columns(complete_header_df,table)
 					#最后一列是输出格式
 					output_file_type = str(table.values[0][-1]) 
 					if output_file_type.lower().strip() != 'csv':
 						output_file_type = 'xlsx'
-
-				if 'pivot' in process.lower() and not table.empty:
-					print(f'[{process_counter}] {process} config processing...')
-					complete_header_df = self.handler.pivot_table(complete_header_df,table)
 
 			checking_result_list.append(success_sheet_df)
 			checking_result_sheet_names.append('Success read amount')
@@ -138,6 +145,9 @@ class DataHandler(object):
 
 		else:
 			enter_exit(f'No valid data found in {self.input_dir}!')
+
+		#必须关闭链接
+		close_sql_connection(self.handler.conn, self.handler.db)
 
 		return result_dict
 
@@ -177,7 +187,7 @@ if __name__ == '__main__':
 	# config_file_dir = ".\\config_calc_amount(India) - OS calc step5"
 	# config_file_dir = '.\\config_calc_words(Global)'
 	# config_file_dir = '.\\config_calc_amount(Global)'
-	# config_file_dir = '.\\config_calc_details(Global)'
+	# config_file_dir = '.\\config_calc_amount(India) - OSversion'
 
 	try: 
 		config_table_path_list = sorted([ x for x in os.listdir(config_file_dir) if '~$' not in x ])
@@ -199,18 +209,23 @@ if __name__ == '__main__':
 				   'time process',
 				   'statistic groups',
 				   'calculations',
-				   'pivot' ]
+				   'pivot',
+				   #通过sqlite3在connect(":memory:")生成临时表做计算
+				   'connection',
+				   'sql',
+				   'write to db' ]
 
 	if not config_table_path_list:
 		enter_exit(f'No config files are found in {config_file_dir}! ')
 
-	#刷新一遍配置文件  暂时不刷新
+	#刷新一遍配置文件 
 	refresh_configs([ os.path.join(config_file_dir,x) for x in config_table_path_list ] )
 	
 	counter = 0 
 	result_df_list = [ ]
 	sheet_name_list = [ ]
 
+	#为什么不先读取所有数据文件然后再统一进行config的处理？ -- 因为每个config文档的字段映射可能不同，所以必须循环读取
 	for config_table_name in config_table_path_list:
 		counter += 1
 		print(f'\nConfig file {counter}:', config_table_name)
@@ -220,11 +235,7 @@ if __name__ == '__main__':
 									config_table_name = config_table_name,
 									config_list = config_list)
 
-		try:
-			#读取之前需要，刷新EXCEL表格所有公式
-			table_dict = table_reader.get_config_tables(if_walk_path=False)
-		except:
-			enter_exit(f'Error when reading :"{config_table_name}" !')
+		table_dict = table_reader.get_config_tables(if_walk_path=False)
 
 		#数据处理部分
 		data_handler = DataHandler( table_dict = table_dict,  #配置表 

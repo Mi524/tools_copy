@@ -1,0 +1,67 @@
+select 机型, 版本, 故障类别, 反馈日期, 机型版本类别量, 
+	   机型版本量, 其他版本类别量, 其他版本量, 
+       类别版本占比, 其他版本类别占比, 类别总量占比, 
+       是否预警, 比其他版本占比高, 比类别总量占比高_全机型,
+       版本最早反馈日期
+from (
+			select  distinct 
+					a.model 机型, 
+					a.osversion 版本, 
+					g.min_date 版本最早反馈日期, 
+					a.fault_type 故障类别, 
+					a.comment_date 反馈日期, 
+					a.amount 机型版本类别量,
+					b.version_sum 机型版本量,
+					-- c.fault_sum 机型类别数量,
+					c.fault_sum - a.amount 其他版本类别量, 
+					d.model_sum - b.version_sum 其他版本量,
+					-- d.model_sum 机型数量,
+					-- e.total_fault_sum 类别总量,
+					-- f.total_sum 当日总量, 
+					round(0.1*10*a.amount/b.version_sum,4) 类别版本占比,
+					round(0.1*10*(c.fault_sum - a.amount)/(d.model_sum - b.version_sum ),4) 其他版本类别占比,
+					round(0.1*10*e.total_fault_sum/f.total_sum,4) 类别总量占比,
+			-- 			case when a.amount <= 50 then a.amount * -0.0178 + 2.089 
+			-- 				 else 1.2 end 比例基准,
+					case when  a.amount >= h.threshold 
+					and   (  
+							  ( a.amount <= 50 and (  (0.1*10*a.amount/b.version_sum - 0.1*10*e.total_fault_sum/f.total_sum)/(0.1*10*e.total_fault_sum/f.total_sum) >= ( a.amount * -0.0178 + 2.089)  ) )  
+						   or ( a.amount >  50  and (  (0.1*10*a.amount/b.version_sum - 0.1*10*e.total_fault_sum/f.total_sum)/(0.1*10*e.total_fault_sum/f.total_sum) >= 1.2  ) )   
+						  )
+					and g.version_rank =  1  
+					-- and g.push_days <= 30 
+					and round( 100 * ( (0.1*10*a.amount/b.version_sum)/iif(c.fault_sum - a.amount< 10, 0.1*10*e.total_fault_sum/f.total_sum,  0.1*10*(c.fault_sum - a.amount)/(d.model_sum - b.version_sum ) ) - 1), 2) >= 40
+					then 1 else 0 end 是否预警, 
+					round( 100 * ( (0.1*10*a.amount/b.version_sum)/iif(c.fault_sum - a.amount < 10, 0.1*10*e.total_fault_sum/f.total_sum, 0.1*10*(c.fault_sum - a.amount)/(d.model_sum - b.version_sum ) ) - 1), 2) ||'%' 比其他版本占比高,
+					round(100 * (0.1*10*a.amount/b.version_sum - 0.1*10*e.total_fault_sum/f.total_sum)/(0.1*10*e.total_fault_sum/f.total_sum),2) || '%'  比类别总量占比高_全机型
+				from table_details a 
+				left join table_version b   
+				on a.model = b.model
+				and a.osversion = b.osversion 
+				and a.comment_date = b.comment_date
+				left join table_type c 
+				on a.model = c.model 
+				and a.fault_type = c.fault_type 
+				and a.comment_date = c.comment_date 
+				left join table_model d  
+				on a.model = d.model 
+				and a.comment_date = d.comment_date 
+				left join table_fault_total e 
+				on a.fault_type = e.fault_type 
+				and a.comment_date = e.comment_date
+				left join table_total f 
+				on a.comment_date = f.comment_date 
+				inner join temp_latest_2versions g
+				on a.model = g.model 
+				and a.osversion = g.osversion
+				and a.comment_date = g.comment_date 
+				inner join table_fault_type h 
+				on a.fault_type = h.fault_type 
+				where 1 = 1  
+				-- and  a.model = 'Z1Pro'
+				-- and a.comment_date = '2020/12/22'
+				-- and a.fault_type = '通话类'
+				and a.fault_type != '其他'
+				and JulianDay(a.comment_date) - JulianDay(g.min_date) <= 30
+                ) y 
+                order by 是否预警 desc, 反馈日期 desc, 故障类别, 机型, 版本; 

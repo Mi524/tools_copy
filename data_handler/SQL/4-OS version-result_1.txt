@@ -1,0 +1,46 @@
+	select distinct  
+		a.model 机型, a.osversion 版本, 
+        a.fault_type 故障分类, a.comment_date 反馈日期, 
+		a.amount 机型版本类别数量,
+		b.version_sum 机型版本数量,
+		c.fault_sum 机型类别数量,
+		d.model_sum 机型数量,
+		a.v1, a.v2, a.v3,
+		round(0.1 * 10 * a.amount/c.fault_sum,2) 版本占比分类,
+		round(0.1 * 10 * b.version_sum/d.model_sum,2) 版本占比总量,
+		round((0.1 * 10 * a.amount/c.fault_sum)/( 0.1 * 10 * b.version_sum/d.model_sum),2) step_1div2,
+		case when a.amount >= 3 and  (0.1 * 10 * a.amount/c.fault_sum)/(0.1 * 10 * b.version_sum/d.model_sum) >= 1.8 then 1 else 0 end 是否预警
+
+		-- e.version_rank 
+	from table_details a 
+	left join 
+	table_version b
+	on a.model = b.model
+	and a.osversion = b.osversion 
+	and a.comment_date = b.comment_date
+	left join 
+	table_type c 
+	on a.model = c.model 
+	and a.fault_type = c.fault_type 
+	and a.comment_date = c.comment_date 
+	left join table_model d  
+	on a.model = d.model 
+	and a.comment_date = d.comment_date 
+	inner join temp_latest_2versions  e 
+	on a.model = e.model 
+	and a.osversion = e.osversion
+	and a.comment_date = e.comment_date 
+	inner join table_fault_type f 
+	on a.fault_type = f.fault_type 
+	where 1 = 1  
+-- 	and  a.model = 'Z1Pro'
+-- 	and a.fault_type = '通话类'
+	and a.fault_type != '其他'
+	and e.version_rank = 1 
+	-- and e.push_days <= 30
+	and JulianDay(a.comment_date) - JulianDay(e.min_date) <= 30
+	order by 
+    case when a.amount >= 3 and  (0.1 * 10 * a.amount/c.fault_sum)/(0.1 * 10 * b.version_sum/d.model_sum) >= 1.8 then 1 else 0 end desc,
+    a.comment_date desc,
+     a.fault_type , 
+    a.model, a.v1 desc, a.v2 desc, a.v3 desc,  a.comment_date desc , a.model, a.osversion desc

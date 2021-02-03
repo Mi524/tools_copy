@@ -1,0 +1,62 @@
+-- 获取近30天内所有机型最新的版本,以及能看到该对应的的最小日期 ---某个版本第一次有人反馈的时间
+--  inner join y.version_rank -1 默认排除掉了已经推送超过30天的版本，因为数据集找不到它的上一个版本
+drop table if exists temp_1;
+create  table temp_1 as 
+	select model, osversion, iif(yy.min_date_all is null,  min_date, null) min_date, v1, v2, v3, amount from 
+    (
+		select model, osversion,  
+			   min(comment_date) min_date ,
+			   v1, v2, v3,
+			   sum(amount) amount
+				from (
+					select region, source, model, 
+					OSversion, v1, v2, v3 , 
+					fault_type, fault_phen, comment_date, amount
+					from warning_test 
+					where osversion is not null 
+				) x 
+		group by model, OSversion
+		order by model, v1 desc, v2 desc, v3 desc 
+		) xx
+		left join 
+		( select min(comment_date) min_date_all from warning_test ) yy 
+        on xx.min_date = yy.min_date_all  ; 
+ 
+
+   
+-- 计算每个机型每天，对应的个最新版本
+drop table if exists temp_latest_2versions ; 
+
+create table temp_latest_2versions as 
+
+	select x.model, x.osversion, x.min_date, x.v1, x.v2, x.v3, 
+   	 x.comment_date,  x.version_rank,
+    	JulianDay(x.comment_date) - JulianDay(x.min_date) + 1 push_days,
+	y.version_rank last_version_rank, y.min_date last_min_date 
+    	--  y.version_rank, y.min_date
+	from 
+	(
+		select a.model, a.osversion, a.min_date,  a.v1, a.v2, a.v3, b.comment_date,
+			rank() over (partition by a.model, a.v1, b.comment_date  order by a.model, b.comment_date desc, a.v1 desc, a.v2 desc, a.v3 desc,  a.min_date desc ) version_rank
+			from temp_1 a  inner join  temp_date b 
+			on a.min_date <= b.comment_date 
+			where 1= 1  
+			order by a.model, b.comment_date desc,  a.v1 desc, a.v2 desc, a.v3 desc,a.min_date desc 
+		) x  
+        inner join 
+	(	
+		select a.model, a.osversion, a.min_date,  a.v1, a.v2, a.v3, b.comment_date,
+			rank() over (partition by a.model, a.v1, b.comment_date  order by a.model, b.comment_date desc, a.v1 desc, a.v2 desc, a.v3 desc,  a.min_date desc ) version_rank
+			from temp_1 a  inner join  temp_date b 
+			on a.min_date <= b.comment_date 
+			where 1= 1  
+			order by a.model, b.comment_date desc,  a.v1 desc, a.v2 desc, a.v3 desc,a.min_date desc 
+		) y 
+		on x.model = y.model 
+        and x.comment_date = y.comment_date 
+        and x.version_rank = y.version_rank - 1  
+        where 1 = 1 
+		and x.version_rank = 1 
+		order by x.model, x.comment_date desc, x.v1 desc, x.v2 desc, x.v3 desc,  x.min_date desc
+;  
+-- 和结果表匹配的时候 model, osversion, comment_date需要相等

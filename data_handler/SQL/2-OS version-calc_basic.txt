@@ -1,0 +1,65 @@
+-- 该机型总量
+drop table if exists table_model;
+create table table_model as
+select model, comment_date, sum(amount) model_sum
+from warning_test 
+group by model, comment_date  ;
+
+-- 该机型该版本数量
+drop table if exists table_version;
+create  table table_version as
+select model, osversion, comment_date, sum(amount) version_sum 
+	from warning_test 
+group by model, OSversion, comment_date 
+order by osversion desc, comment_date desc  ;
+
+-- 该机型该分类数量 
+drop table if exists table_type;
+
+create  table table_type as
+select model, comment_date, fault_type, sum(amount) fault_sum
+from warning_test 
+group by model, comment_date, fault_type ;
+
+drop table if exists table_total;
+
+create table table_total as
+select comment_date, sum(amount)  total_sum
+from warning_test 
+group by comment_date  ;
+
+drop table if exists table_fault_total;
+
+create  table table_fault_total as
+select comment_date, fault_type,  sum(amount)  total_fault_sum
+from warning_test 
+group by comment_date, fault_type  ;
+
+-- 是否属于硬件类，只保留软件类故障 
+drop table if exists table_fault_type;
+
+create  table table_fault_type as 
+select distinct fault_type, case when fault_type in ('外观结构类','配件','按键类','屏裂类', '电池盖裂类') then 99999
+		when fault_type in ('使用时间类', '其他' ,'反应慢/卡顿类','发热类', '拍照类') then 6
+		else 3 end threshold from table_fault_total 
+        ; 
+	
+drop table if exists table_details;
+
+create table table_details as 
+select model, comment_date, OSversion,v1, v2, v3, fault_type, sum(amount)  amount
+from (
+		select region, source, model, 
+		OSversion, v1, v2, v3,
+		fault_type, fault_phen, comment_date, amount
+		from warning_test 
+        where osversion is not null 
+) x 
+group by model,comment_date, OSversion, fault_type  ;
+
+drop table if exists temp_date;
+
+create   table temp_date as 
+	select distinct comment_date from table_details
+    order by comment_date desc  ;
+
