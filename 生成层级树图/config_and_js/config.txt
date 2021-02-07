@@ -1,0 +1,60 @@
+﻿<!-- 注释：输出图表的各种参数配置 -->
+series:[
+    {
+        type: 'tree',
+        id: 0,
+        name: 'tree1',
+        data: [data],
+
+        <!-- 输出图表距离网页上下左右留空的位置 -->
+        top: '2%',
+        left: '8%',
+        bottom: '2%',
+        right: '28%',
+
+        <!-- 节点图标形状 大小 -->
+        symbol : 'emptyCircle',
+        symbolSize: 12,
+
+        //edgeShape: 'polyline',
+	edgeShape: 'curve',
+        edgeForkPosition: '60%',
+        initialTreeDepth: 1,
+
+        itemStyle:{
+            <!-- 节点图标 背景颜色，圆形图标线条颜色 -->
+            color:'rgb(130, 160, 190)',
+            borderColor:'rgb(0, 112, 192)'
+        },
+
+        <!-- 线条格式 -->
+        lineStyle: {
+            width: 2,
+            color : 'rgb(0, 112, 192)',
+            curveness : '0.5'
+        },
+        <!-- 节点文本格式 -->
+        label: {
+            fontSize :15,
+            color : 'rgb(0, 0, 0 )',
+            labelsize : 20,
+            backgroundColor: '#fff',
+            position: 'left',
+
+            verticalAlign: 'middle',
+            align: 'right'
+        },
+
+        leaves: {
+            label: {
+                position: 'right',
+                verticalAlign: 'middle',
+                align: 'left'
+            }
+        },
+
+        expandAndCollapse: true,
+        animationDuration: 200,
+        animationDurationUpdate: 500
+    }
+]

@@ -1,0 +1,5 @@
+﻿<!-- 勿删本行 是否放入左边的选框, 默认填YES-->    
+#是否包含选择框                 
+if_contains_selection_frame = NO
+#是否转成繁体字
+if_convert_to_tw = No

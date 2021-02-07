@@ -69,22 +69,24 @@ Function calc_day(start_date As Variant, end_date As Variant) As Integer
     
 End Function
 
-Function replace_re(text As String, replace_mode As Integer) As String
-    '需要开启工具->引用->VBA Script Regulation Expressions 5.5
-    Dim regEx As New RegExp
+
+Function extract_number(text As String, replace_mode As Integer) As String
+'获取X人X天里面的两个数字
+    Dim human_str As String
+    Dim day_str As String
     
-    'mode = 1 获取 N人M天的 N，其他mode数字获取M天
-    If replace_mode = 1 Then
-        regEx.Pattern = "\d{1,2}天"
-        result = regEx.Replace(text, "")
-        replace_re = Replace(result, "人", "")
+    If InStr(text, "人") = False Or InStr(text, "天") = False Then
+        extract_number = ""
     Else:
-        regEx.Pattern = "\d{1,2}人"
-        result = regEx.Replace(text, "")
-        replace_re = Replace(result, "天", "")
-        
+        If replace_mode = 1 Then
+            human_str = Split(text, "人")(0)
+            extract_number = CDbl(human_str)
+        Else:
+            day_str = Split(text, "人")(1)
+            day_str = Replace(day_str, "天", "")
+            extract_number = CDbl(day_str)
+        End If
     End If
-    
 End Function
 
 Function get_regex_letter(text As String) As String
@@ -99,13 +101,15 @@ Function get_work_day(summary_sheet As Worksheet)
    '后面的正则replace函数必须填入string格式，必须先声明human_day_value的变量类型,否则报错格式不匹配
     Dim human_day_value As String
     Dim columnCount As Long
-    Dim RowCount As Long
+    Dim rowCount As Long
     
     '清除掉表格的筛选
     summary_sheet.AutoFilter.ShowAllData
     
     '最远行
-    RowCount = summary_sheet.Cells(summary_sheet.Rows.Count, 1).End(xlUp).Row + 1
+    rowCount = summary_sheet.Cells(summary_sheet.Rows.Count, 1).End(xlUp).Row
+    Debug.Print (rowCount)
+    Debug.Print ("--------")
     '最远列
     columnCount = summary_sheet.Cells(1, summary_sheet.Columns.Count).End(xlToLeft).Column
     
@@ -126,22 +130,21 @@ Function get_work_day(summary_sheet As Worksheet)
         summary_sheet.Cells(1, columnCount + 1).Value = "人数"
         summary_sheet.Cells(1, columnCount + 2).Value = "天数"
         
-        For i = 2 To RowCount
+        For i = 2 To rowCount
             '得到X人X天
             human_day_value = summary_sheet.Cells(i, columnCount).Value
             '拆分 null
-            human_num = replace_re(human_day_value, 1)
-            day_num = replace_re(human_day_value, 2)
+            human_num = extract_number(human_day_value, 1)
+            day_num = extract_number(human_day_value, 2)
             summary_sheet.Cells(i, columnCount + 1).Value = human_num
             summary_sheet.Cells(i, columnCount + 2).Value = day_num
         Next i
     End If
     
-    
     '新的columnCount
     columnCount = summary_sheet.Cells(1, summary_sheet.Columns.Count).End(xlToLeft).Column
     '统一加上边框线
-    summary_sheet.Range(summary_sheet.Cells(1, 1), summary_sheet.Cells(RowCount, columnCount)).Borders.LineStyle = xlContinuous
+    summary_sheet.Range(summary_sheet.Cells(1, 1), summary_sheet.Cells(rowCount, columnCount)).Borders.LineStyle = xlContinuous
     
 End Function
 
@@ -159,9 +162,41 @@ Function get_quarter_startdate(date_text As Variant) As Date
 
 End Function
 
+
+Function delete_strikethrough(summary_sheet As Worksheet)
+
+    Dim r As Integer
+    Dim c As Integer
+    Dim rowCount As Integer
+    Dim columnCount As Integer
+    
+    '如果发现某个单元格有删除线，删掉整行记录
+    rowCount = summary_sheet.Cells(summary_sheet.Rows.Count, 1).End(xlUp).Row + 1
+    '记录第一行最远的列
+    columnCount = summary_sheet.Cells(1, summary_sheet.Columns.Count).End(xlToLeft).Column
+    
+    counter = 0
+    '从后往前检查删除线出现的位置行,(行索引每次删除都会出现变化，需要倒序进行删除)
+    For r = rowCount To 2 Step -1
+        For c = 1 To columnCount
+            If summary_sheet.Cells(r, c).Font.Strikethrough = True Then
+                summary_sheet.Rows(r).EntireRow.Delete
+                Debug.Print (counter & ":删除第" & r & "行")
+                '本行删除后，跳出当前循环
+                counter = counter + 1
+                Exit For
+            End If
+        Next c
+    Next r
+    Debug.Print ("检查删除线完成")
+
+End Function
+
+
+
 Sub macroScript()
     Dim columnCount As Long
-    Dim RowCount As Long
+    Dim rowCount As Long
     Dim main_rng As Range
     Dim new_ws As Worksheet
     Dim standard_country_ws As Worksheet
@@ -170,6 +205,9 @@ Sub macroScript()
     Dim ws_count As Integer
     Dim max_plan_day As Integer
     Dim original_wb As Workbook
+    
+    '运行期间不更新窗口 加快运行速度
+    Application.ScreenUpdating = False
     
     '读取原始的输入文档
     Set original_wb = Workbooks("需求汇总-输入.xlsx")
@@ -181,17 +219,24 @@ Sub macroScript()
     Set summary_sheet = original_wb.Worksheets("海外测试需求总概Summary")
     '获取国家表
     Set standard_country_ws = original_wb.Worksheets("国家表")
-    '
-    get_work_day summary_sheet
     
+    '删掉带有删除线的行,循环过多，暂不采用该函数
+    delete_strikethrough summary_sheet
+
+    '计算汇总表的人力和天数字段
+    get_work_day summary_sheet
+
     summary_sheet.AutoFilter.ShowAllData
     
     '填充右上方的开始日期和结束日期，需要用到start_date和end_date,
     'start_date可以人工指定，或者直接采用该列最小的日期作为start_date
     start_date = Application.WorksheetFunction.Min(summary_sheet.Columns(5))
+    start_date = get_quarter_startdate(start_date)
     max_plan_day = Application.WorksheetFunction.Max(summary_sheet.Columns(10))
-    '最大的截止日期为 最大的计划结束日期 + 最大的测试规划天数
+    
+    '最大的截止日期为 最大的计划结束日期 + 最大的测试规划天数得到日期的所在季度最后一天
     end_date = Application.WorksheetFunction.Max(summary_sheet.Columns(6)) + max_plan_day
+    end_date = get_quarter_enddate(end_date)
     
     '不可以放set在前面,set涉及到对象和引用概念
     end_date_number = calc_day(start_date, end_date)
@@ -205,8 +250,8 @@ Sub macroScript()
      '生成新的EXCEL文档
     Set new_wb = Workbooks.Add
     
-    For i = 3 To 4
-    'For i = 2 To standard_country_ws.Cells(standard_country_ws.Rows.Count, 1).End(xlUp).Row + 1
+    'For i = 3 To 3
+    For i = 2 To standard_country_ws.Cells(standard_country_ws.Rows.Count, 1).End(xlUp).Row
          '获取国家
         country = standard_country_ws.Cells(i, 1).Value
     
@@ -223,11 +268,11 @@ Sub macroScript()
             original_wb.Activate
             summary_sheet.Activate
             '记录第一列最远的行
-            RowCount = summary_sheet.Cells(summary_sheet.Rows.Count, 1).End(xlUp).Row + 1
+            rowCount = summary_sheet.Cells(summary_sheet.Rows.Count, 1).End(xlUp).Row + 1
             '记录第一行最远的列
             columnCount = summary_sheet.Cells(1, summary_sheet.Columns.Count).End(xlToLeft).Column
             '获取范围
-            Set main_rng = summary_sheet.Range(summary_sheet.Cells(1, 1), summary_sheet.Cells(RowCount + 1, columnCount))
+            Set main_rng = summary_sheet.Range(summary_sheet.Cells(1, 1), summary_sheet.Cells(rowCount + 1, columnCount))
             
             '根据国家条件过滤
             main_rng.AutoFilter field:=4, Criteria1:=country
@@ -276,7 +321,7 @@ Sub macroScript()
             
                     '计算start_date_plan的日期的单元格应该在哪个位置,最小日期填充在主表最后一列往后的两列，
                     '目标填充日期的单元格位置列坐标 应该等于  columnCount + 2 + 目标日期和开始日期之间的日期差异
-                    start_position = columnCount + 2 + DateDiff("d", start_date, start_date_plan) - 1
+                    start_position = columnCount + 2 + DateDiff("d", start_date, start_date_plan)
                     '循环
                     For g_i = start_position To start_position + day_plan - 1 Step 1
 
@@ -316,7 +361,7 @@ Sub macroScript()
             Dim formula_address_previous_column As String
             Dim formula_address1 As String
             Dim formula_address2 As String
-            'Dim chart_range As Range
+            Dim chart_range As Range
             
             '计算出差总人数  循环开始 最后一列 + 空白列 到 表头日期最后一列
             For h = columnCount + 2 To columnCount + 2 + end_date_number
@@ -327,8 +372,13 @@ Sub macroScript()
                formula_address_previous_column = new_ws.Cells(2, columnCount + 1).Address(RowAbsolute:=False, ColumnAbsolute:=False)
                '本列位置的字母是什么
                column_letter = get_regex_letter(formula_address_previous_column)
+               '如果该国家记录为空，公式计算范围避开第一行的表头日期，直接赋值为0
+               If country_max_row > 1 Then
+                   Formula1 = "=sum(" & formula_address1 & ":" & formula_address2 & ")"
+               Else:
+                   Formula1 = "0"
+               End If
                
-               Formula1 = "=sum(" & formula_address1 & ":" & formula_address2 & ")"
                formula2 = "=sumif(" & "B2" & ":" & "B" & country_max_row & "," & column_letter & (country_max_row + 2) & "," & formula_address1 & ":" & formula_address2 & ")"
                formula3 = "=sumif(" & "B2" & ":" & "B" & country_max_row & "," & column_letter & (country_max_row + 3) & "," & formula_address1 & ":" & formula_address2 & ")"
                formula4 = "=sumif(" & "B2" & ":" & "B" & country_max_row & "," & column_letter & (country_max_row + 4) & "," & formula_address1 & ":" & formula_address2 & ")"
@@ -346,7 +396,7 @@ Sub macroScript()
             
             '右下角 画图，折线图不支持超过255个数据点，所以每次只画1个季度图表长度，
             '起始位置的列为columnCount + 2 + 本季度起始日期对应的点 + 本季度截止日期对应的点
-            quarter_start_position = columnCount + 2 + DateDiff("d", start_date, start_quarter_date) + 1
+            quarter_start_position = columnCount + 2 + DateDiff("d", start_date, start_quarter_date)
             quarter_end_position = quarter_start_position + DateDiff("d", start_quarter_date, end_quarter_date)
             
             'Debug.Print (end_quarter_date)
@@ -366,7 +416,7 @@ Sub macroScript()
             chart_line.Chart.ChartType = 4
             '图表标题
             chart_line.Chart.HasTitle = True
-            chart_line.Chart.ChartTitle.text = country & "1月-" & Month(end_quarter_date) & "月" & "测试人力需求"
+            chart_line.Chart.ChartTitle.text = country & Month(start_quarter_date) & "月-" & Month(end_quarter_date) & "月" & "测试人力需求"
             
             '去掉legend
             chart_line.Chart.HasLegend = False
@@ -376,6 +426,7 @@ Sub macroScript()
             chart_line.Chart.Axes(xlCategory).TickLabels.NumberFormat = "m/d"
             chart_line.Chart.Axes(xlCategory).TickLabels.Font.Name = "微软雅黑"
             chart_line.Chart.Axes(xlCategory).TickLabels.Font.Size = 9
+            
             '设置图表背景颜色
             chart_line.Chart.ChartStyle = 233
             
@@ -396,17 +447,24 @@ Sub macroScript()
         End If
     Next i
     
-    summary_sheet.AutoFilter.ShowAllData
-    
-    '放进一个绝对路径
-    'save_file_path = "D:\My Documents\Documents\vchat\NewChatFiles\20210125-测试人力安排表自动化\原始数据处理\input_data\通信测试中心人力安排计划(各国).xlsx"
-    '放进一个相对路径,这个路径没有指定放到哪个文件夹，可能会出现在C盘的文档(documents文件夹)
-    save_file_path = "通信测试中心人力安排计划(各国).xlsx"
     '如果有已经同名的文档，不弹出提示窗口，直接覆盖保存
     Application.DisplayAlerts = False
+    
+    '删除new_ws多出的Sheet1
+    new_wb.Worksheets("Sheet1").Delete
+    summary_sheet.AutoFilter.ShowAllData
+    
+    '放进一个相对路径,这个路径没有指定放到哪个文件夹，可能会出现在C盘的文档(documents文件夹)
+    save_file_path = "通信测试中心人力安排计划(各国).xlsx"
+
     new_wb.Close SaveChanges:=True, Filename:=save_file_path
+
+    '保存输入文档
+    original_wb.Save
+    original_wb.Close SaveChanges:=True
     Debug.Print ("运行结束")
     
 End Sub
+
 
 

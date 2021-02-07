@@ -2,6 +2,14 @@ import win32com.client as client
 import argparse
 import os 
 from common_utils.os_functions import enter_exit, check_create_new_folder, read_from_text
+import traceback
+import logging
+
+try:
+    whatever()
+except Exception as e:
+    logging.error(traceback.format_exc())
+
 
 def run_vba(original_path,new_path,macro,macro_sub_name):
 	#检查输出文件夹 是否存在
@@ -13,22 +21,26 @@ def run_vba(original_path,new_path,macro,macro_sub_name):
 	xlapp = client.gencache.EnsureDispatch('Excel.Application')   
 	# xlapp = client.dynamic.Dispatch('Excel.Application')
 	# xlapp = client.DispatchEx('Excel.Application')
-	xlapp.Visible = 0  
-	xlapp.DisplayAlerts = False 
-	xlwb = xlapp.Workbooks.Open(original_path,ReadOnly=1) 
-	xlwb.Visible = 0
-	xlwb.VBProject.VBComponents.Add(1)
+	try:
+		xlapp.Visible = 0  
+		xlapp.DisplayAlerts = False 
+		xlwb = xlapp.Workbooks.Open(original_path,ReadOnly=1) 
+		xlwb.Visible = 0
+		xlwb.VBProject.VBComponents.Add(1)
 
-	for i in xlwb.VBProject.VBComponents:
-		if i.name == '模块1':
-			module = xlwb.VBProject.VBComponents.Item(i.name).CodeModule
-			module.AddFromString(macro)  
-			xlwb.Application.Run(macro_sub_name)
+		for i in xlwb.VBProject.VBComponents:
+			if i.name == '模块1':
+				module = xlwb.VBProject.VBComponents.Item(i.name).CodeModule
+				module.AddFromString(macro)  
+				xlwb.Application.Run(macro_sub_name)
 
-	xlwb.SaveAs(new_path,FileFormat=51,ConflictResolution=2)
-	xlwb.Close(True)
-	xlapp.Quit
-	del xlapp
+		xlwb.SaveAs(new_path,FileFormat=51,ConflictResolution=2)
+		xlwb.Close(True)
+	except Exception as e :
+		logging.error(traceback.format_exc())
+	finally:
+		xlapp.Quit
+		del xlapp
 
 	print("{} Draw completed".format(new_path.split('\\')[-1]))
 
@@ -38,7 +50,7 @@ if __name__ == "__main__":
 
 	#参数传入配置文件夹
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-c',type=str,required=False,
+	parser.add_argument('-v',type=str,required=False,
 						help = '放VBA的文件夹 vba folder dir', default='VBA')
 	parser.add_argument('-i',type=str,required=False,
 						help = '输入文件夹 input folder dir', default='input_dir')
@@ -51,7 +63,7 @@ if __name__ == "__main__":
 	args = parser.parse_args()
 
 	#VBA文本路径
-	vba_dir = args.c
+	vba_dir = args.v
 	#输入EXCEL文件位置
 	input_dir = os.path.join(cwd, args.i)
 	#输出文件位置
