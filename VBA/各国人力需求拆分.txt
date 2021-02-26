@@ -195,6 +195,7 @@ End Function
 
 
 Sub macroScript()
+
     Dim columnCount As Long
     Dim rowCount As Long
     Dim main_rng As Range
@@ -205,6 +206,19 @@ Sub macroScript()
     Dim ws_count As Integer
     Dim max_plan_day As Integer
     Dim original_wb As Workbook
+    Dim today_date As Date
+    Dim start_quarter_date As Date
+    Dim end_quarter_date As Date
+    Dim country_max_row As Integer
+    
+    Dim date_column_width As Long
+    Dim Formula1 As String
+    Dim formula2 As String
+    Dim column_letter As String
+    Dim formula_address_previous_column As String
+    Dim formula_address1 As String
+    Dim formula_address2 As String
+    Dim chart_range As Range
     
     '运行期间不更新窗口 加快运行速度
     Application.ScreenUpdating = False
@@ -220,7 +234,7 @@ Sub macroScript()
     '获取国家表
     Set standard_country_ws = original_wb.Worksheets("国家表")
     
-    '删掉带有删除线的行,循环过多，暂不采用该函数
+    '删掉带有删除线的行,循环过多
     delete_strikethrough summary_sheet
 
     '计算汇总表的人力和天数字段
@@ -228,6 +242,14 @@ Sub macroScript()
 
     summary_sheet.AutoFilter.ShowAllData
     
+    summary_sheet.Activate
+    '记录第一列最远的行
+    rowCount = summary_sheet.Cells(summary_sheet.Rows.Count, 1).End(xlUp).Row + 1
+    '记录第一行最远的列
+    columnCount = summary_sheet.Cells(1, summary_sheet.Columns.Count).End(xlToLeft).Column
+    '获取范围
+    Set main_rng = summary_sheet.Range(summary_sheet.Cells(1, 1), summary_sheet.Cells(rowCount + 1, columnCount))
+        
     '填充右上方的开始日期和结束日期，需要用到start_date和end_date,
     'start_date可以人工指定，或者直接采用该列最小的日期作为start_date
     start_date = Application.WorksheetFunction.Min(summary_sheet.Columns(5))
@@ -241,17 +263,32 @@ Sub macroScript()
     '不可以放set在前面,set涉及到对象和引用概念
     end_date_number = calc_day(start_date, end_date)
 
+    '今天所在季度的最后一天, 可以填别的日期生成另一个需要季度图表
+    'today_date = Date
+    today_date = CDate("2021-04-06")
+    start_quarter_date = get_quarter_startdate(today_date)
+    end_quarter_date = get_quarter_enddate(today_date)
+    
+    '右下角 画图，折线图不支持超过255个数据点，所以每次只画1个季度图表长度，
+    '起始位置的列为columnCount + 2 + 本季度起始日期对应的点 + 本季度截止日期对应的点
+    quarter_start_position = columnCount + 2 + DateDiff("d", start_date, start_quarter_date)
+    quarter_end_position = quarter_start_position + DateDiff("d", start_quarter_date, end_quarter_date)
+
     ws_count_counter = 0
     ws_count_counter = ws_count_counter + 1
     
-    Debug.Print ("数据最小日期:" & Application.WorksheetFunction.text(start_date, "yyyy-mm-dd"))
-    Debug.Print ("数据最大日期:" & Application.WorksheetFunction.text(end_date, "yyyy-mm-dd"))
+    '定义右边第一行 日期的列宽
+    date_column_width = 4
+    
+    Debug.Print ("数据最小季度开始日期:" & Application.WorksheetFunction.text(start_date, "yyyy-mm-dd"))
+    Debug.Print ("数据最大季度结束日期:" & Application.WorksheetFunction.text(end_date, "yyyy-mm-dd"))
+    Debug.Print ("数据当前季度开始日期:" & Application.WorksheetFunction.text(start_quarter_date, "yyyy-mm-dd"))
         
      '生成新的EXCEL文档
     Set new_wb = Workbooks.Add
     
-    'For i = 3 To 3
-    For i = 2 To standard_country_ws.Cells(standard_country_ws.Rows.Count, 1).End(xlUp).Row
+    For i = 3 To 3
+    'For i = 2 To standard_country_ws.Cells(standard_country_ws.Rows.Count, 1).End(xlUp).Row
          '获取国家
         country = standard_country_ws.Cells(i, 1).Value
     
@@ -266,14 +303,7 @@ Sub macroScript()
             Set new_ws = new_wb.Worksheets(country)
             
             original_wb.Activate
-            summary_sheet.Activate
-            '记录第一列最远的行
-            rowCount = summary_sheet.Cells(summary_sheet.Rows.Count, 1).End(xlUp).Row + 1
-            '记录第一行最远的列
-            columnCount = summary_sheet.Cells(1, summary_sheet.Columns.Count).End(xlToLeft).Column
-            '获取范围
-            Set main_rng = summary_sheet.Range(summary_sheet.Cells(1, 1), summary_sheet.Cells(rowCount + 1, columnCount))
-            
+
             '根据国家条件过滤
             main_rng.AutoFilter field:=4, Criteria1:=country
             
@@ -284,8 +314,8 @@ Sub macroScript()
             new_ws.Activate
             '选择复制目标的开始位置
             new_ws.Range("A1").Select
-            '先粘贴内容的列宽
-            Selection.PasteSpecial Paste:=xlPasteColumnWidths
+            '先粘贴内容的列宽 --> 发现同等列宽下新生成的表格左边位置太大，不要复制列宽
+            'Selection.PasteSpecial Paste:=xlPasteColumnWidths
             '再粘贴内容（带所有的内容格式粘贴）
             Selection.PasteSpecial Paste:=xlPasteAll, operation:=xlNone, skipblanks:=False, Transpose:=False
             
@@ -308,7 +338,7 @@ Sub macroScript()
                     next_date_value = next_date(next_date_value)
                 End With
                 '修改列宽
-                new_ws.Columns(j).ColumnWidth = 4.25
+                new_ws.Columns(j).ColumnWidth = date_column_width
             Next j
 
             '填充人力计划区域(右边的人数填充)
@@ -343,7 +373,6 @@ Sub macroScript()
             Next k
             
             '计算右下方汇总人数: 计划出差人数  海外网络适应性-4G 海外网络适应性-5G 海外本地化测试
-
             Value1 = "计划出差人数"
             Value2 = "海外网络适应性-4G"
             Value3 = "海外网络适应性-5G"
@@ -353,15 +382,7 @@ Sub macroScript()
             new_ws.Cells(country_max_row + 3, columnCount + 1).Value = Value3
             new_ws.Cells(country_max_row + 4, columnCount + 1).Value = Value4
             
-            new_ws.Columns(columnCount + 1).ColumnWidth = 18
-            
-            Dim Formula1 As String
-            Dim formula2 As String
-            Dim column_letter As String
-            Dim formula_address_previous_column As String
-            Dim formula_address1 As String
-            Dim formula_address2 As String
-            Dim chart_range As Range
+            new_ws.Columns(columnCount + 1).ColumnWidth = 12
             
             '计算出差总人数  循环开始 最后一列 + 空白列 到 表头日期最后一列
             For h = columnCount + 2 To columnCount + 2 + end_date_number
@@ -389,17 +410,8 @@ Sub macroScript()
                new_ws.Cells(country_max_row + 4, h).Formula = formula4
 
             Next h
-            
-            '今天所在季度的最后一天
-            start_quarter_date = get_quarter_startdate(Date)
-            end_quarter_date = get_quarter_enddate(Date)
-            
-            '右下角 画图，折线图不支持超过255个数据点，所以每次只画1个季度图表长度，
-            '起始位置的列为columnCount + 2 + 本季度起始日期对应的点 + 本季度截止日期对应的点
-            quarter_start_position = columnCount + 2 + DateDiff("d", start_date, start_quarter_date)
-            quarter_end_position = quarter_start_position + DateDiff("d", start_quarter_date, end_quarter_date)
-            
-            'Debug.Print (end_quarter_date)
+            '打印行，起始日期位置，结束位置
+            'Debug.Print (country_max_row)
             'Debug.Print (quarter_start_position)
             'Debug.Print (quarter_end_position)
             
@@ -411,7 +423,8 @@ Sub macroScript()
             
             '调整图表高度和宽度
             chart_line.Height = 15 * 16 '图高8厘米, 字体大小为9
-            chart_line.Width = (quarter_end_position - quarter_start_position) * 30
+            '这里图表的宽度和第一行表头日期的列宽相关,N个单元格的列宽 * 这个季度有多少天
+            chart_line.Width = (quarter_end_position - quarter_start_position) * 4 * 7
             '设置图表为折线图
             chart_line.Chart.ChartType = 4
             '图表标题
@@ -444,6 +457,19 @@ Sub macroScript()
             Cells.Select
             Cells.Font.Name = "微软雅黑"
             Cells.Font.Size = 9
+                     
+            '冻结窗口,冻结第一行，冻结开始的列 就是本季度第一天,即表格开始放置的当列
+            new_ws.Activate
+            new_ws.Range(new_ws.Cells(2, graphColumn), new_ws.Cells(2, graphColumn)).Select
+
+            With ActiveWindow
+                .SplitRow = 1
+                .SplitColumn = columnCount + 1
+                .FreezePanes = True
+            End With
+            
+            ActiveWindow.ScrollColumn = ActiveCell.Column
+
         End If
     Next i
     
@@ -459,12 +485,9 @@ Sub macroScript()
 
     new_wb.Close SaveChanges:=True, Filename:=save_file_path
 
-    '保存输入文档
-    original_wb.Save
-    original_wb.Close SaveChanges:=True
+    '保存输入文档,
+    'original_wb.Save
+    'original_wb.Close SaveChanges:=True
     Debug.Print ("运行结束")
     
 End Sub
-
-
-

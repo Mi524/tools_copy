@@ -1,0 +1,62 @@
+{% extends '../base.html' %}
+
+{% block content %}
+
+<form id='select_file_path' action="{% url 'basic_tables:upload_inputdata' %}" method="post"
+    enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>EXCEL数据导入</label>
+    <input type="file" title="Upload excel file" name="excel_file" required="required">
+    <input id='upload_input' type="submit" value=" 导入 ">
+    <label id='data_count'>总行数:{{ data_count }}</label>
+</form>
+
+<table id='maintable' class='tablesorter'>
+    <thead>
+        <tr>
+            <th>测试机型</th>
+            <th>业务模块</th>
+            <th>测试项</th>
+            <th>国家/地区</th>
+            <th>计划开始时间</th>
+            <th>计划完成时间</th>
+            <th>人*天</th>
+            <th>跟机工程师</th>
+            <th>平台信息</th>
+            <th>完成情况</th>
+            <th>BPM测试单链接</th>
+            <th>备注</th>
+            <th>更新原因</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if data %}
+        {% for rows in data %}
+        <tr>
+            <td>{{ rows.test_model }}</td>
+            <td>{{ rows.type_of_test }}</td>
+            <td>{{ rows.details|default:"" }}</td>
+            <td>{{ rows.region }}</td>
+            <td>{{ rows.start_date|date:"Y/m/d" }}</td>
+            <td>{{ rows.end_date|date:"Y/m/d" }}</td>
+            <td>{{ rows.person_day }}</td>
+            <td>{{ rows.engineer|default:"" }}</td>
+            <td>{{ rows.platform_info|default:"" }}</td>
+            <td>{{ rows.status|default:"" }}</td>
+            <td>{{ rows.bpm_link|default:"" }}</td>
+            <td>{{ rows.remark|default:"" }}</td>
+            <td>{{ rows.update_reason|default:"" }}</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+
+<div id='clear_bar'>
+    <form action="{% url 'basic_tables:clear_inputdata' %}" method="post">
+        {% csrf_token %}
+        <button id='clear_data'>清空数据表</button>
+    </form>
+</div>
+
+{% endblock %}

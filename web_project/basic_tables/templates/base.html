@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}首页{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+</head>
+
+<body>
+    <div id='mainbody' class='main-body-inner'>
+        <div id="header" class="header clo">
+            <div class="container-wrap">
+                <div class="header-logo">
+                    <span class="logo-box">
+                        <img src="{% static 'img/header_log.jpg' %}">
+                    </span>
+                </div>
+                <div class="header-nav">
+                    <ul id="header-menus" class="header-menu">
+                        <li class="current asc">
+                            <a href="{% url 'basic_tables:index' %}">输入数据</a>
+                            <!-- <span class="cur"></span> -->
+                        </li>
+                        <li class="asc"><a href="">基础表</a></li>
+                        <li class="asc"><a href="" target="_blank">图表</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% block content %} {% endblock %}
+    </div>
+    <div id='bottom_bar'></div>
+</body>
+<script src={% static 'js/jquery-3.5.1.min.js' %}></script>
+<script src={% static 'js/jquery.tablesorter.min.js' %}></script>
+<script src={% static 'js/custom.js' %}></script>
+
+</html>

@@ -1,0 +1,95 @@
+#mainbody {
+    margin:0px 0px 0px 0px;
+}
+
+/*头部*/
+.header {
+    margin:0px 0px 0px 0px;
+    height: 60px;
+    background: #3aa4fe;
+    position: relative;
+    width: 100%;
+    z-index: 999;
+    background-color: #415FFF;
+}
+
+.header-logo {
+    float: left;
+    /*margin: 0 30px;*/
+    height: 60px;
+    width: 180px;
+    /*margin: 0 20px;*/
+    margin: 0 0 0 20px;
+}
+
+form {
+    margin:40px 0px 0px 20px;
+    width: 90%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+}
+
+form label{
+    position: relative;
+    float:left;
+    padding:5px;
+}
+
+form input {
+    position:relative;
+    float:left;
+    margin:5px 5px 5px 5px;
+    padding:2px;
+    height: 30px;
+    display: block;
+}
+
+form #data_count {
+    position: relative;
+    float:right;
+    padding:10px;
+}
+
+table {
+    position:relative;
+    border-collapse:collapse;
+    margin:10px 20px 0 20px;
+    font-size:9px;
+    table-layout: fixed;
+    width:1400px;
+}
+
+table thead tr {
+    background-color: #3152c0;
+    color:#ffffff;
+    text-align:left;
+    font-weight:bold;
+}
+
+table thead tr th {
+    padding:1px 8px 1px 8px;
+}
+
+table tbody tr {
+    border-bottom:1px solid #dddddd;
+}
+
+table tbody tr:nth-of-type(even){
+    background-color: #f3f3f3f3
+}
+
+table tbody tr:last-of-type {
+    border-bottom:2px solid #2549c0;
+}
+
+table #fail_split_row  {
+    background-color: rgb(146, 146, 43);
+    font-size:9px;
+}
+
+#bottom_bar {
+    height: 60px;
+    width: 100%;
+}
