@@ -28,9 +28,9 @@ class BasicCountry(models.Model):
 
 class UndertakeTeam(models.Model):
     # 测试的承接团队
-    country_cn = models.CharField(max_length=30, unique=True)
-    undertake_team = models.CharField(max_length=200, unique=True)
-    undertake_date = models.DateField()
+    country_cn = models.CharField(max_length=30)
+    undertake_team = models.CharField(max_length=200, null=True)
+    undertake_date = models.DateField(null=True)
 
     class Meta:
         unique_together = ('country_cn', 'undertake_team', 'undertake_date')

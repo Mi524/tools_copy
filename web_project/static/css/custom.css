@@ -22,6 +22,7 @@
     margin: 0 0 0 20px;
 }
 
+
 form {
     margin:40px 0px 0px 20px;
     width: 90%;
@@ -58,8 +59,16 @@ table {
     margin:10px 20px 0 20px;
     font-size:9px;
     table-layout: fixed;
+
+}
+
+table#input_data_table {
     width:1400px;
 }
+
+table#info_team {
+    width:600px;
+} 
 
 table thead tr {
     background-color: #3152c0;

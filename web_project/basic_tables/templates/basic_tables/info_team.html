@@ -1,0 +1,41 @@
+{% extends '../base.html' %}
+
+{% block content %}
+
+<form id='select_file_path' action="{% url 'basic_tables:upload_team' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>EXCEL数据导入</label>
+    <input type="file" title="Upload excel file" name="excel_file" required="required">
+    <input id='upload_input' type="submit" value=" 导入 ">
+    <label id='data_count'>总行数:{{ data_count }}</label>
+</form>
+
+<table id='info_team' class='tablesorter'>
+    <thead>
+        <tr>
+            <th>国家/地区</th>
+            <th>承接团队</th>
+            <th>更新日期</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if data %}
+        {% for rows in data %}
+        <tr>
+            <td>{{ rows.region }}</td>
+            <td>{{ rows.undertake_team }}</td>
+            <td>{{ rows.undertake_date }}</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+
+<div id='clear_bar'>
+    <form action="{% url 'basic_tables:clear_inputdata' %}" method="post">
+        {% csrf_token %}
+        <button id='clear_data_team'>清空数据表</button>
+    </form>
+</div>
+
+{% endblock %}

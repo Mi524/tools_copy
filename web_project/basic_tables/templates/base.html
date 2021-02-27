@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}首页{% endblock %}</title>
+    <title>{% block title %}测试中心人力安排{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/common.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 
@@ -24,11 +24,17 @@
                 <div class="header-nav">
                     <ul id="header-menus" class="header-menu">
                         <li class="current asc">
-                            <a href="{% url 'basic_tables:index' %}">输入数据</a>
-                            <!-- <span class="cur"></span> -->
+                            <a href="{% url 'basic_tables:index' %}">基础数据</a>
                         </li>
-                        <li class="asc"><a href="">基础表</a></li>
-                        <li class="asc"><a href="" target="_blank">图表</a></li>
+                        <li>
+                            <a class="table_list" href="{% url 'basic_tables:info_team' %}">承接团队表</a>
+                        </li>
+                        <li class="asc">
+                            <a href="{% url 'basic_tables:info_team'%}">基础表</a>
+                        </li>
+                        <li class="asc">
+                            <a href="" target="_blank">图表</a>
+                        </li>
                     </ul>
                 </div>
             </div>

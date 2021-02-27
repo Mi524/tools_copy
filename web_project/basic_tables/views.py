@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.template import loader
 from django.shortcuts import render
 
-from .models import BasicCountry, InputData
+from .models import BasicCountry, InputData, UndertakeTeam
 
 from openpyxl import load_workbook, Workbook
 from openpyxl.writer.excel import save_virtual_workbook
@@ -42,7 +42,7 @@ def index(request):
     input_data_list = InputData.objects.all().order_by(
         'region', 'start_date', 'test_model')
 
-    return render(request, 'basic_tables/index.html',
+    return render(request, "basic_tables/index.html",
                   context={'data': input_data_list,
                            'data_count': input_data_list.count()})
 
@@ -50,9 +50,13 @@ def index(request):
 def upload_inputdata(request):
     fail_records = []
     if request.method == 'POST':
+        print(request)
         # 处理输入的EXCEL，将EXCEL数据导入进数据库
         excel_file = request.FILES['excel_file']
-        wb = load_workbook(excel_file)
+        try:
+            wb = load_workbook(excel_file)
+        except:
+            return HttpResponseRedirect(reverse("basic_tables:index"))
         # 读取默认的第一个sheet
         ws = wb.worksheets[0]
 
@@ -112,8 +116,61 @@ def clear_inputdata(request):
     return HttpResponseRedirect(reverse("basic_tables:index"))
 
 
+def info_team(request):
+    # 存储承接团队表的页面
+    object_list = UndertakeTeam.objects.all().order_by(
+        'country_cn', 'undertake_date', 'undertake_team')
+    return render(request, 'basic_tables/info_team.html',
+                  context={'data': object_list,
+                           'data_count': object_list.count()})
+
+
+# 承接团队的基础表
+def upload_team(request):
+    fail_records = []
+    if request.method == 'POST':
+        # 处理输入的EXCEL，将EXCEL数据导入进数据库
+        excel_file = request.FILES['excel_file']
+        try:
+            wb = load_workbook(excel_file)
+        except:
+            return HttpResponseRedirect(reverse("basic_tables:info_team"))
+        # 读取默认的第一个sheet
+        ws = wb.worksheets[0]
+
+        # 先检查一遍是否有日期问题的数据
+        row_counter = 0
+        for row in list(ws.iter_rows())[1:]:
+            row_counter += 1
+            row_data = []
+            for cell in row:
+                row_data.append(cell.value)
+
+            # try:
+            p = UndertakeTeam.objects.create(
+                country_cn=row_data[0],
+                undertake_team=row_data[1],
+                undertake_date=row_data[2]
+            )
+        # except:
+            # 生成失败的记录往底下放
+            fail_records.append(row_data)
+
+        # 如果有存在无法写入的记录，写入EXCEL表格导出
+        fail_header = [
+            "国家/地区",
+            "承接团队",
+            "更新日期",
+        ]
+
+        if fail_records:
+            return write_failure_records(fail_header, fail_records)
+
+    return HttpResponseRedirect(reverse('basic_tables:info_team'))
+
+
 def data_basic_country(request):
     input_country_list = BasicCountry.objects.order_by('id')
     output = ','.join([i for i in input_country_list])
 
-    return render(request, 'templates/basic_tables/basic_country.html', context={})
+    return render(request, 'basic_tables/basic_country.html', context={})
